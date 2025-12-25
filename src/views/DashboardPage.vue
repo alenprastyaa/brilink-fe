@@ -1,9 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-    <div class="mb-8">
-      <h1 class="text-4xl font-bold text-gray-800 mb-2">Dashboard Laporan Toko</h1>
-      <p class="text-gray-600">Monitoring dan Analisis Performa Toko</p>
-    </div>
+    <div class="mb-8"></div>
 
     <div v-if="loading" class="flex items-center justify-center h-64">
       <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>

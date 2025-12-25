@@ -53,30 +53,10 @@ onUnmounted(() => {
         to="/"
         class="flex items-center space-x-3 group transition-all duration-300 hover:scale-105"
       >
-        <div class="relative">
-          <div
-            class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
-          >
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              ></path>
-            </svg>
-          </div>
-          <div
-            class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"
-          ></div>
-        </div>
         <div>
           <h1
             class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
-          >
-            LAPORAN HARIAN
-          </h1>
-          <p class="text-xs text-gray-500 font-medium">Dashboard</p>
+          ></h1>
         </div>
       </router-link>
 
