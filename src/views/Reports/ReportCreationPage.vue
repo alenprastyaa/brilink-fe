@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 import { useAuth } from '@/composables/useAuth'
@@ -24,6 +24,9 @@ const isStoreFieldDisabled = ref(false)
 const currentStep = ref(1)
 const totalSteps = 3
 const selectedStoreId = ref(null)
+const step1Ref = ref(null)
+const step2Ref = ref(null)
+const step3Ref = ref(null)
 
 const newBank = ref({
   store_id: null,
@@ -151,6 +154,67 @@ const nextStep = () => {
 const prevStep = () => {
   if (currentStep.value > 1) {
     currentStep.value--
+  }
+}
+
+const focusableSelector =
+  'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+const getCurrentStepElement = () => {
+  if (currentStep.value === 1) return step1Ref.value
+  if (currentStep.value === 2) return step2Ref.value
+  return step3Ref.value
+}
+
+const getFocusableElements = (container) => {
+  if (!container) return []
+
+  return Array.from(container.querySelectorAll(focusableSelector)).filter((element) => {
+    if (element.tabIndex === -1) return false
+    if (element.getAttribute('aria-hidden') === 'true') return false
+    if (element.offsetParent === null && getComputedStyle(element).position !== 'fixed') return false
+    return true
+  })
+}
+
+const focusFirstFieldInCurrentStep = async () => {
+  await nextTick()
+  const [firstField] = getFocusableElements(getCurrentStepElement())
+  firstField?.focus()
+}
+
+const handleEnterNavigation = async (event) => {
+  if (event.key !== 'Enter') return
+
+  const target = event.target
+  const tagName = target?.tagName?.toLowerCase()
+
+  if (tagName === 'textarea') return
+  if (tagName === 'button') {
+    event.preventDefault()
+    return
+  }
+
+  event.preventDefault()
+
+  const stepElement = getCurrentStepElement()
+  const focusableElements = getFocusableElements(stepElement)
+  const currentIndex = focusableElements.indexOf(target)
+
+  if (currentIndex >= 0 && currentIndex < focusableElements.length - 1) {
+    focusableElements[currentIndex + 1]?.focus()
+    return
+  }
+
+  if (currentStep.value === 1 && canProceedToStep2.value && stores.value.length > 0) {
+    nextStep()
+    await focusFirstFieldInCurrentStep()
+    return
+  }
+
+  if (currentStep.value === 2 && !((filledBanks.value === 0 && banks.value.length > 0) || banks.value.length === 0)) {
+    nextStep()
+    await focusFirstFieldInCurrentStep()
   }
 }
 
@@ -313,8 +377,8 @@ const formatCurrency = (amount) => {
         <div
           class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden"
         >
-          <form @submit.prevent="handleSubmitReport">
-            <div v-show="currentStep === 1" class="p-8">
+          <form @submit.prevent="handleSubmitReport" @keydown.enter="handleEnterNavigation">
+            <div v-show="currentStep === 1" ref="step1Ref" class="p-8">
               <div class="mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-2">Informasi Dasar</h2>
                 <p class="text-gray-600">Pilih toko dan tanggal untuk laporan Anda</p>
@@ -396,7 +460,7 @@ const formatCurrency = (amount) => {
               </div>
             </div>
 
-            <div v-show="currentStep === 2" class="p-8">
+            <div v-show="currentStep === 2" ref="step2Ref" class="p-8">
               <div class="mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-2">Saldo Bank & Pembayaran</h2>
                 <p class="text-gray-600">Masukkan saldo untuk setiap metode pembayaran</p>
@@ -560,7 +624,7 @@ const formatCurrency = (amount) => {
               </div>
             </div>
 
-            <div v-show="currentStep === 3" class="p-8">
+            <div v-show="currentStep === 3" ref="step3Ref" class="p-8">
               <div class="mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-2">Konfirmasi Laporan</h2>
                 <p class="text-gray-600">Periksa kembali data laporan sebelum menyimpan</p>

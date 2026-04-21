@@ -4,7 +4,7 @@ import { useApi } from '@/composables/useApi'
 import { useAuth } from '@/composables/useAuth'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 import FormField from '@/components/FormField.vue'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, subDays } from 'date-fns'
 import { id } from 'date-fns/locale'
 
 const { get, del, put, removeUangNitip } = useApi()
@@ -23,6 +23,7 @@ const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const totalPages = ref(0)
 const totalItems = ref(0)
+const previousBalanceCache = new Map()
 
 const filter = ref({
   store_id: '',
@@ -57,6 +58,101 @@ const changeItemsPerPage = () => {
   fetchReports()
 }
 
+const normalizeAmount = (value) => Number(value) || 0
+
+const getReportTotalSaldo = (report) =>
+  normalizeAmount(report?.total_balance) + normalizeAmount(report?.uang_nitip)
+
+const applyClientSideFilters = (reportList, filters) => {
+  let filteredReports = [...reportList]
+
+  if (filteredReports.length > 0) {
+    if (filters.store_id) {
+      filteredReports = filteredReports.filter((r) => r.store_id === filters.store_id)
+    }
+    if (filters.start_date) {
+      const startDate = new Date(filters.start_date)
+      filteredReports = filteredReports.filter(
+        (r) => new Date(r.report_date).setHours(0, 0, 0, 0) >= startDate.setHours(0, 0, 0, 0),
+      )
+    }
+    if (filters.end_date) {
+      const endDate = new Date(filters.end_date)
+      endDate.setHours(23, 59, 59, 999)
+      filteredReports = filteredReports.filter((r) => new Date(r.report_date) <= endDate)
+    }
+  }
+
+  return filteredReports
+}
+
+const getPreviousReportCacheKey = (storeId, reportDate) => `${storeId}::${reportDate}`
+
+const fetchPreviousTotalSaldo = async (storeId, reportDate) => {
+  const cacheKey = getPreviousReportCacheKey(storeId, reportDate)
+  if (previousBalanceCache.has(cacheKey)) {
+    return previousBalanceCache.get(cacheKey)
+  }
+
+  const previousDate = format(subDays(parseISO(reportDate), 1), 'yyyy-MM-dd')
+  const queryParams = new URLSearchParams({
+    store_id: storeId,
+    end_date: previousDate,
+    page: '1',
+    limit: '1',
+  })
+
+  const response = await get(`/reports?${queryParams.toString()}`)
+  const previousReport = response.reports?.[0]
+  const previousTotalSaldo = previousReport ? getReportTotalSaldo(previousReport) : undefined
+
+  previousBalanceCache.set(cacheKey, previousTotalSaldo)
+  return previousTotalSaldo
+}
+
+const enrichReportsWithProfit = async (reportList) => {
+  const storeGroups = {}
+  const processedReports = []
+
+  for (const report of reportList) {
+    if (!storeGroups[report.store_id]) storeGroups[report.store_id] = []
+    storeGroups[report.store_id].push(report)
+  }
+
+  const initialBalanceEntries = await Promise.all(
+    Object.entries(storeGroups).map(async ([storeId, storeReports]) => {
+      const sortedReports = [...storeReports].sort((a, b) => {
+        const dateDiff = parseISO(a.report_date).getTime() - parseISO(b.report_date).getTime()
+        if (dateDiff !== 0) return dateDiff
+        return String(a.report_id).localeCompare(String(b.report_id), undefined, { numeric: true })
+      })
+
+      const firstReport = sortedReports[0]
+      const previousTotalSaldo = await fetchPreviousTotalSaldo(storeId, firstReport.report_date)
+
+      return [storeId, { sortedReports, previousTotalSaldo }]
+    }),
+  )
+
+  for (const [storeId, { sortedReports, previousTotalSaldo }] of initialBalanceEntries) {
+    let lastTotalSaldo = previousTotalSaldo
+
+    for (const report of sortedReports) {
+      const currentTotalSaldo = getReportTotalSaldo(report)
+      const profitToday = lastTotalSaldo === undefined ? 0 : currentTotalSaldo - lastTotalSaldo
+
+      processedReports.push({
+        ...report,
+        profit_today: profitToday,
+      })
+
+      lastTotalSaldo = currentTotalSaldo
+    }
+  }
+
+  return processedReports
+}
+
 const fetchReports = async () => {
   isLoading.value = true
   try {
@@ -73,61 +169,13 @@ const fetchReports = async () => {
     totalItems.value = response.total || fetchedReports.length
     totalPages.value = response.total_pages || Math.ceil(totalItems.value / itemsPerPage.value)
 
-    // Client-side filtering backup
-    if (fetchedReports.length > 0) {
-      if (filter.value.store_id) {
-        fetchedReports = fetchedReports.filter((r) => r.store_id === filter.value.store_id)
-      }
-      if (filter.value.start_date) {
-        const startDate = new Date(filter.value.start_date)
-        fetchedReports = fetchedReports.filter(
-          (r) => new Date(r.report_date).setHours(0, 0, 0, 0) >= startDate.setHours(0, 0, 0, 0),
-        )
-      }
-      if (filter.value.end_date) {
-        const endDate = new Date(filter.value.end_date)
-        endDate.setHours(23, 59, 59, 999)
-        fetchedReports = fetchedReports.filter((r) => new Date(r.report_date) <= endDate)
-      }
-    }
-
-    // Sorting & Profit Calculation
-    fetchedReports.sort((a, b) => {
-      const dateA = parseISO(a.report_date).getTime()
-      const dateB = parseISO(b.report_date).getTime()
-      return dateA !== dateB ? dateB - dateA : a.store_name.localeCompare(b.store_name)
-    })
-
-    const processedReports = []
-    const lastDayBalance = {}
-    const storeGroups = {}
-
-    for (const report of fetchedReports) {
-      if (!storeGroups[report.store_id]) storeGroups[report.store_id] = []
-      storeGroups[report.store_id].push(report)
-    }
-
-    for (const storeId in storeGroups) {
-      const storeReports = storeGroups[storeId].sort(
-        (a, b) => parseISO(a.report_date).getTime() - parseISO(b.report_date).getTime(),
-      )
-      lastDayBalance[storeId] = undefined
-      for (const report of storeReports) {
-        const currentBalance = report.total_balance || 0
-        let profit = 0
-        if (lastDayBalance[storeId] !== undefined) {
-          profit = currentBalance - lastDayBalance[storeId]
-        }
-        processedReports.push({ ...report, profit_today: profit })
-        lastDayBalance[storeId] = currentBalance
-      }
-    }
-
-    processedReports.sort((a, b) => {
-      const dateA = parseISO(a.report_date).getTime()
-      const dateB = parseISO(b.report_date).getTime()
-      return dateA !== dateB ? dateB - dateA : a.store_name.localeCompare(b.store_name)
-    })
+    fetchedReports = applyClientSideFilters(fetchedReports, filter.value)
+    const processedReports = (await enrichReportsWithProfit(fetchedReports))
+      .sort((a, b) => {
+        const dateA = parseISO(a.report_date).getTime()
+        const dateB = parseISO(b.report_date).getTime()
+        return dateA !== dateB ? dateB - dateA : a.store_name.localeCompare(b.store_name)
+      })
 
     reports.value = processedReports
   } catch (error) {
