@@ -3,7 +3,13 @@ import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 
 const { user, logout } = useAuth()
+const emit = defineEmits(['open-sidebar'])
 const isDropdownOpen = ref(false)
+
+const handleOpenSidebar = () => {
+  console.log('[sidebar] hamburger clicked')
+  emit('open-sidebar')
+}
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
@@ -49,16 +55,34 @@ onUnmounted(() => {
   >
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
       <!-- Logo Section -->
-      <router-link
-        to="/"
-        class="flex items-center space-x-3 group transition-all duration-300 hover:scale-105"
-      >
-        <div>
-          <h1
-            class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
-          ></h1>
-        </div>
-      </router-link>
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          class="md:hidden inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2 text-gray-700 shadow-sm"
+          @click.stop="handleOpenSidebar"
+          aria-label="Buka menu"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
+        <router-link
+          to="/"
+          class="flex items-center space-x-3 group transition-all duration-300 hover:scale-105"
+        >
+          <div>
+            <h1
+              class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
+            ></h1>
+          </div>
+        </router-link>
+      </div>
 
       <!-- User Profile Section -->
       <div class="relative dropdown-container">

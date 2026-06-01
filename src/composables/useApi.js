@@ -102,7 +102,7 @@ export function useApi() {
           )
           break
         case 500:
-          await showAlert('Nama Sudah Tersedia', 'Buat Bank dengan nama yang berbeda !', 'error')
+          await showAlert('Server Error!', data?.message || 'Terjadi kesalahan pada server.', 'error')
           break
         case 502:
         case 503:

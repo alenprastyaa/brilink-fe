@@ -8,6 +8,7 @@ import BankManagementPage from '@/views/Banks/BankManagementPage.vue'
 import ReportCreationPage from '@/views/Reports/ReportCreationPage.vue'
 import ReportListPage from '@/views/Reports/ReportListPage.vue'
 import ProfitAnalysisPage from '@/views/Analytics/ProfitAnalysisPage.vue'
+import WithdrawalPage from '@/views/Withdrawals/WithdrawalPage.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 function decodeToken(token) {
@@ -84,6 +85,12 @@ const router = createRouter({
           path: 'analytics/profit',
           name: 'ProfitAnalysis',
           component: ProfitAnalysisPage,
+          meta: { requiresAuth: true, roles: ['admin', 'karyawan'] },
+        },
+        {
+          path: 'withdrawals',
+          name: 'WithdrawalManagement',
+          component: WithdrawalPage,
           meta: { requiresAuth: true, roles: ['admin', 'karyawan'] },
         },
       ],
