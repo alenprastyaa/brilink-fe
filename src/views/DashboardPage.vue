@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-    <div class="mb-8"></div>
+  <div class="min-h-screen max-w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-4 sm:px-4 lg:px-6">
+    <div class="mb-3 sm:mb-6"></div>
 
     <div v-if="loading" class="flex items-center justify-center h-64">
       <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
     </div>
 
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+    <div v-else-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 text-center sm:p-6">
       <p class="text-red-600 font-semibold">{{ error }}</p>
       <button
         @click="fetchDashboardData"
@@ -16,17 +16,17 @@
       </button>
     </div>
 
-    <div v-else-if="data" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-500 text-sm font-medium">Total Toko</p>
-              <p class="text-3xl font-bold text-gray-800 mt-2">{{ data.overview.total_stores }}</p>
+    <div v-else-if="data" class="max-w-full space-y-4 overflow-x-hidden sm:space-y-6">
+      <div class="grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-4 2xl:gap-6">
+        <div class="min-w-0 rounded-xl border-l-4 border-blue-600 bg-white p-3 shadow-sm sm:p-6 sm:shadow-lg">
+          <div class="flex min-w-0 items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-gray-500 sm:text-sm">Total Toko</p>
+              <p class="mt-1 text-xl font-bold text-gray-800 sm:mt-2 sm:text-3xl">{{ data.overview.total_stores }}</p>
             </div>
-            <div class="p-4 rounded-full">
+            <div class="rounded-full p-2 sm:p-4">
               <svg
-                class="w-8 h-8 text-blue-600"
+                class="h-6 w-6 text-blue-600 sm:h-8 sm:w-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -42,15 +42,15 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-600">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-500 text-sm font-medium">Total Laporan</p>
-              <p class="text-3xl font-bold text-gray-800 mt-2">{{ data.overview.total_reports }}</p>
+        <div class="min-w-0 rounded-xl border-l-4 border-green-600 bg-white p-3 shadow-sm sm:p-6 sm:shadow-lg">
+          <div class="flex min-w-0 items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-gray-500 sm:text-sm">Total Laporan</p>
+              <p class="mt-1 text-xl font-bold text-gray-800 sm:mt-2 sm:text-3xl">{{ data.overview.total_reports }}</p>
             </div>
-            <div class="p-4 rounded-full">
+            <div class="rounded-full p-2 sm:p-4">
               <svg
-                class="w-8 h-8 text-green-600"
+                class="h-6 w-6 text-green-600 sm:h-8 sm:w-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -66,17 +66,17 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-600">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-500 text-sm font-medium">Saldo Terkini</p>
-              <p class="text-2xl font-bold text-gray-800 mt-2">
+        <div class="min-w-0 rounded-xl border-l-4 border-purple-600 bg-white p-3 shadow-sm sm:p-6 sm:shadow-lg">
+          <div class="flex min-w-0 items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-gray-500 sm:text-sm">Saldo Terkini</p>
+              <p class="mt-1 break-words text-[11px] font-bold text-gray-800 sm:mt-2 sm:text-2xl">
                 {{ formatCurrency(data.overview.latest_total_balance) }}
               </p>
             </div>
-            <div class="p-4 rounded-full">
+            <div class="shrink-0 rounded-full p-1 sm:p-4">
               <svg
-                class="w-8 h-8 text-purple-600"
+                class="h-6 w-6 text-purple-600 sm:h-8 sm:w-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -93,32 +93,32 @@
         </div>
 
         <div
-          class="bg-white rounded-xl shadow-lg p-6 border-l-4"
+          class="rounded-xl border-l-4 bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg"
           :class="data.period.total_profit >= 0 ? 'border-emerald-600' : 'border-red-600'"
         >
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-500 text-sm font-medium">Profit (30 Hari)</p>
+          <div class="flex min-w-0 items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-gray-500 sm:text-sm">Profit (30 Hari)</p>
               <p
-                class="text-2xl font-bold mt-2"
+                class="mt-1 break-words text-[11px] font-bold sm:mt-2 sm:text-2xl"
                 :class="data.period.total_profit >= 0 ? 'text-emerald-600' : 'text-red-600'"
               >
                 {{ formatCurrency(data.period.total_profit) }}
               </p>
               <p
-                class="text-sm mt-1"
+                class="mt-1 text-xs sm:text-sm"
                 :class="data.period.total_profit >= 0 ? 'text-emerald-600' : 'text-red-600'"
               >
                 {{ data.period.profit_percentage }}%
               </p>
             </div>
             <div
-              class="p-4 rounded-full"
+              class="shrink-0 rounded-full p-1 sm:p-4"
               :class="data.period.total_profit >= 0 ? 'bg-emerald-100' : ''"
             >
               <svg
                 v-if="data.period.total_profit >= 0"
-                class="w-8 h-8 text-emerald-600"
+                class="h-6 w-6 text-emerald-600 sm:h-8 sm:w-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -132,7 +132,7 @@
               </svg>
               <svg
                 v-else
-                class="w-8 h-8 text-red-600"
+                class="h-6 w-6 text-red-600 sm:h-8 sm:w-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -149,53 +149,101 @@
         </div>
       </div>
 
-      <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
-        <div class="flex items-center justify-between flex-wrap gap-4">
+      <div class="min-w-0 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white shadow-sm sm:p-6 sm:shadow-lg">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p class="text-blue-100 text-sm font-medium">Periode Laporan</p>
-            <p class="text-2xl font-bold mt-1">
+            <p class="text-xs font-medium text-blue-100 sm:text-sm">Periode Laporan</p>
+            <p class="mt-1 text-base font-bold sm:text-2xl">
               {{ formatDate(data.period.start_date) }} - {{ formatDate(data.period.end_date) }}
             </p>
           </div>
-          <div class="flex gap-8">
-            <div>
-              <p class="text-blue-100 text-sm">Total Laporan</p>
-              <p class="text-3xl font-bold">{{ data.period.total_reports }}</p>
+          <div class="grid min-w-0 grid-cols-1 gap-3 xl:flex xl:gap-8">
+            <div class="min-w-0">
+              <p class="text-xs text-blue-100 sm:text-sm">Total Laporan</p>
+              <p class="text-xl font-bold sm:text-3xl">{{ data.period.total_reports }}</p>
             </div>
-            <div>
-              <p class="text-blue-100 text-sm">Rata-rata Saldo</p>
-              <p class="text-2xl font-bold">{{ formatCurrency(data.period.average_balance) }}</p>
+            <div class="min-w-0">
+              <p class="text-xs text-blue-100 sm:text-sm">Rata-rata Saldo</p>
+              <p class="break-words text-[11px] font-bold sm:text-2xl">{{ formatCurrency(data.period.average_balance) }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl shadow-lg p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Tren Saldo Harian</h2>
-          <div class="h-80">
+      <div class="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+        <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
+          <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Tren Saldo Harian</h2>
+          <div class="h-60 min-w-0 sm:h-80">
             <canvas ref="balanceChart"></canvas>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Tren Profit Harian</h2>
-          <div class="h-80">
+        <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
+          <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Tren Profit Harian</h2>
+          <div class="h-60 min-w-0 sm:h-80">
             <canvas ref="profitChart"></canvas>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Laporan per Toko (30 Hari)</h2>
-        <div class="h-80">
+      <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
+        <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Laporan per Toko (30 Hari)</h2>
+        <div class="h-60 min-w-0 sm:h-80">
           <canvas ref="storeReportsChart"></canvas>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Top 5 Toko Berdasarkan Saldo</h2>
-        <div class="overflow-x-auto">
+      <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
+        <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Top 5 Toko Berdasarkan Saldo</h2>
+
+        <div class="space-y-3 xl:hidden">
+          <article
+            v-for="(store, index) in data.top_stores"
+            :key="store.store_id"
+            class="min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-3"
+          >
+            <div class="flex min-w-0 items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+                    :class="
+                      index === 0
+                        ? 'bg-yellow-500'
+                        : index === 1
+                          ? 'bg-gray-400'
+                          : index === 2
+                            ? 'bg-orange-600'
+                            : 'bg-gray-300'
+                    "
+                  >
+                    {{ index + 1 }}
+                  </span>
+                  <h3 class="min-w-0 truncate text-sm font-semibold text-gray-900">{{ store.store_name }}</h3>
+                </div>
+                <p class="mt-2 text-xs text-gray-500">{{ store.total_reports }} laporan</p>
+              </div>
+              <span
+                class="shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold"
+                :class="store.balance_growth >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              >
+                {{ formatCurrency(store.balance_growth) }}
+              </span>
+            </div>
+            <div class="mt-3 grid grid-cols-1 gap-2 text-xs xl:grid-cols-2">
+              <div class="min-w-0 rounded-lg bg-white p-2">
+                <p class="text-gray-500">Rata-rata</p>
+                <p class="mt-1 break-words text-[11px] font-semibold text-gray-900">{{ formatCurrency(store.avg_balance) }}</p>
+              </div>
+              <div class="min-w-0 rounded-lg bg-white p-2">
+                <p class="text-gray-500">Saldo Maks</p>
+                <p class="mt-1 break-words text-[11px] font-semibold text-gray-900">{{ formatCurrency(store.max_balance) }}</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="hidden overflow-x-auto xl:block">
           <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr class="bg-gray-50">
@@ -317,84 +365,84 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Aktivitas Terbaru</h2>
-        <div class="space-y-4">
+      <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
+        <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Aktivitas Terbaru</h2>
+        <div class="space-y-3 sm:space-y-4">
           <div
             v-for="activity in data.recent_activities.slice(0, 10)"
             :key="activity.report_id"
-            class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            class="flex min-w-0 flex-col gap-3 rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 sm:flex-row sm:items-center sm:justify-between sm:p-4"
           >
-            <div class="flex-1">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-gray-800">{{ activity.store_name }}</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="min-w-0 truncate text-sm font-semibold text-gray-800 sm:text-base">{{ activity.store_name }}</span>
                 <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">{{
                   activity.creator_name
                 }}</span>
               </div>
-              <p class="text-sm text-gray-600 mt-1">{{ formatDate(activity.report_date) }}</p>
+              <p class="mt-1 text-xs text-gray-600 sm:text-sm">{{ formatDate(activity.report_date) }}</p>
               <p v-if="activity.keterangan" class="text-xs text-gray-500 mt-1 truncate">
                 {{ activity.keterangan }}
               </p>
             </div>
-            <div class="text-right ml-4 flex-shrink-0">
-              <p class="font-bold text-gray-800">{{ formatCurrency(activity.total_balance) }}</p>
+            <div class="min-w-0 flex-shrink-0 text-left sm:ml-4 sm:text-right">
+              <p class="break-words text-xs font-bold text-gray-800 sm:text-base">{{ formatCurrency(activity.total_balance) }}</p>
               <p class="text-xs text-gray-500">{{ formatDateTime(activity.created_at) }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Perbandingan Bulanan</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-blue-50 rounded-lg p-6">
-            <p class="text-sm text-gray-600 font-medium mb-2">Bulan Ini</p>
+      <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
+        <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Perbandingan Bulanan</h2>
+        <div class="grid grid-cols-1 gap-3 xl:grid-cols-3 xl:gap-6">
+          <div class="min-w-0 rounded-lg bg-blue-50 p-4 sm:p-6">
+            <p class="mb-2 text-sm font-medium text-gray-600">Bulan Ini</p>
             <p class="text-xs text-gray-500 mb-3">
               {{ data.monthly_comparison.current_month.period }}
             </p>
             <div class="space-y-2">
-              <div class="flex justify-between">
+              <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Laporan:</span>
                 <span class="font-semibold">{{
                   data.monthly_comparison.current_month.total_reports
                 }}</span>
               </div>
-              <div class="flex justify-between">
+              <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Rata-rata:</span>
-                <span class="font-semibold">{{
+                <span class="break-words text-right text-xs font-semibold sm:text-sm">{{
                   formatCurrency(data.monthly_comparison.current_month.avg_balance)
                 }}</span>
               </div>
             </div>
           </div>
 
-          <div class="bg-green-50 rounded-lg p-6">
-            <p class="text-sm text-gray-600 font-medium mb-2">Bulan Lalu</p>
+          <div class="min-w-0 rounded-lg bg-green-50 p-4 sm:p-6">
+            <p class="mb-2 text-sm font-medium text-gray-600">Bulan Lalu</p>
             <p class="text-xs text-gray-500 mb-3">
               {{ data.monthly_comparison.last_month.period }}
             </p>
             <div class="space-y-2">
-              <div class="flex justify-between">
+              <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Laporan:</span>
                 <span class="font-semibold">{{
                   data.monthly_comparison.last_month.total_reports
                 }}</span>
               </div>
-              <div class="flex justify-between">
+              <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Rata-rata:</span>
-                <span class="font-semibold">{{
+                <span class="break-words text-right text-xs font-semibold sm:text-sm">{{
                   formatCurrency(data.monthly_comparison.last_month.avg_balance)
                 }}</span>
               </div>
             </div>
           </div>
 
-          <div class="bg-purple-50 rounded-lg p-6">
-            <p class="text-sm text-gray-600 font-medium mb-2">Pertumbuhan</p>
+          <div class="min-w-0 rounded-lg bg-purple-50 p-4 sm:p-6">
+            <p class="mb-2 text-sm font-medium text-gray-600">Pertumbuhan</p>
             <p class="text-xs text-gray-500 mb-3">Perubahan (vs. Bulan Lalu)</p>
             <div class="space-y-2">
-              <div class="flex justify-between">
+              <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Laporan:</span>
                 <span
                   class="font-semibold"
@@ -406,10 +454,10 @@
                   }}{{ data.monthly_comparison.growth.reports }}
                 </span>
               </div>
-              <div class="flex justify-between">
+              <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Rata-rata:</span>
                 <span
-                  class="font-semibold"
+                  class="break-words text-right text-xs font-semibold sm:text-sm"
                   :class="
                     data.monthly_comparison.growth.avg_balance >= 0
                       ? 'text-green-600'

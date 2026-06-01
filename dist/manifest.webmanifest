@@ -1,0 +1,19 @@
+{
+  "name": "Laporan Toko Hakimah",
+  "short_name": "Hakimah",
+  "description": "Aplikasi laporan toko Hakimah",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

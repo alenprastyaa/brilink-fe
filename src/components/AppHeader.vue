@@ -1,13 +1,16 @@
 <script setup>
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { useSweetAlert } from '@/composables/useSweetAlert'
 
 const { user, logout } = useAuth()
+const { showToast, showToastConfirm } = useSweetAlert()
 const emit = defineEmits(['open-sidebar'])
 const isDropdownOpen = ref(false)
+const installPromptEvent = ref(null)
+const canInstall = ref(false)
 
 const handleOpenSidebar = () => {
-  console.log('[sidebar] hamburger clicked')
   emit('open-sidebar')
 }
 
@@ -15,18 +18,62 @@ const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
 }
 
+const handleInstallApp = async () => {
+  isDropdownOpen.value = false
+
+  const isInstalled =
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+
+  if (isInstalled) {
+    showToast('Aplikasi sudah terinstall.', 'info')
+    return
+  }
+
+  if (!installPromptEvent.value) {
+    showToast(
+      'Install belum tersedia.',
+      'info',
+      'Pastikan dibuka lewat HTTPS/localhost, lalu gunakan menu browser > Install app/Add to Home Screen.'
+    )
+    return
+  }
+
+  const confirm = await showToastConfirm(
+    'Install aplikasi?',
+    'Tambahkan Hakimah ke layar utama agar terasa seperti aplikasi mobile.',
+    'Install'
+  )
+
+  if (!confirm.isConfirmed) return
+
+  try {
+    const promptEvent = installPromptEvent.value
+    await promptEvent.prompt()
+    const result = await promptEvent.userChoice
+
+    if (result.outcome === 'accepted') {
+      showToast('Instalasi aplikasi dimulai.', 'success')
+    } else {
+      showToast('Instalasi dibatalkan.', 'info')
+    }
+
+    installPromptEvent.value = null
+    canInstall.value = false
+  } catch (error) {
+    console.error('Install prompt error:', error)
+    showToast('Gagal membuka prompt install.', 'error')
+  }
+}
+
 const handleLogout = async (event) => {
-  // Prevent any default behavior
   event.preventDefault()
   event.stopPropagation()
 
   try {
-    console.log('Logout button clicked') // Debug log
     isDropdownOpen.value = false
 
     await nextTick()
 
-    // Call logout function
     await logout()
   } catch (error) {
     console.error('Logout error:', error)
@@ -40,25 +87,40 @@ const closeDropdown = (event) => {
   }
 }
 
+const handleBeforeInstallPrompt = (event) => {
+  event.preventDefault()
+  installPromptEvent.value = event
+  canInstall.value = true
+}
+
+const handleAppInstalled = () => {
+  installPromptEvent.value = null
+  canInstall.value = false
+}
+
 onMounted(() => {
   document.addEventListener('click', closeDropdown)
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  window.addEventListener('appinstalled', handleAppInstalled)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdown)
+  window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  window.removeEventListener('appinstalled', handleAppInstalled)
 })
 </script>
 
 <template>
   <header
-    class="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-md border-b border-gray-200/50 shadow-sm"
+    class="fixed top-0 left-0 right-0 z-50 h-16 bg-white backdrop-blur-md border-b border-gray-200/50 shadow-sm"
   >
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="flex h-16 items-center justify-between px-4 md:px-6">
       <!-- Logo Section -->
       <div class="flex items-center gap-3">
         <button
           type="button"
-          class="md:hidden inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2 text-gray-700 shadow-sm"
+          class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm"
           @click.stop="handleOpenSidebar"
           aria-label="Buka menu"
         >
@@ -84,16 +146,34 @@ onUnmounted(() => {
         </router-link>
       </div>
 
-      <!-- User Profile Section -->
-      <div class="relative dropdown-container">
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-700 shadow-sm transition hover:bg-blue-100"
+          :title="canInstall ? 'Install aplikasi' : 'Petunjuk install aplikasi'"
+          aria-label="Install aplikasi"
+          @click.stop="handleInstallApp"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 3v10m0 0l4-4m-4 4L8 9M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"
+            />
+          </svg>
+        </button>
+
+        <!-- User Profile Section -->
+        <div class="relative dropdown-container">
         <button
           @click="toggleDropdown"
-          class="flex items-center space-x-3 p-2 rounded-2xl bg-gray-50/50 hover:bg-gray-100/70 transition-all duration-300 border border-gray-200/50 hover:border-gray-300/70 group"
+          class="flex items-center space-x-2 rounded-2xl border border-gray-200/50 bg-gray-50/50 p-2 transition-all duration-300 hover:border-gray-300/70 hover:bg-gray-100/70 group"
           type="button"
         >
           <!-- Avatar -->
           <div
-            class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300"
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md transition-all duration-300 group-hover:shadow-lg"
           >
             <span class="text-white font-bold text-sm">
               {{ user?.username?.charAt(0).toUpperCase() }}
@@ -265,6 +345,7 @@ onUnmounted(() => {
             </div>
           </div>
         </Transition>
+        </div>
       </div>
     </div>
   </header>

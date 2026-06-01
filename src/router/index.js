@@ -9,6 +9,7 @@ import ReportCreationPage from '@/views/Reports/ReportCreationPage.vue'
 import ReportListPage from '@/views/Reports/ReportListPage.vue'
 import ProfitAnalysisPage from '@/views/Analytics/ProfitAnalysisPage.vue'
 import WithdrawalPage from '@/views/Withdrawals/WithdrawalPage.vue'
+import WhatsappReportPage from '@/views/WhatsappReports/WhatsappReportPage.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 function decodeToken(token) {
@@ -92,6 +93,18 @@ const router = createRouter({
           name: 'WithdrawalManagement',
           component: WithdrawalPage,
           meta: { requiresAuth: true, roles: ['admin', 'karyawan'] },
+        },
+        {
+          path: 'whatsapp-reports',
+          name: 'WhatsappReports',
+          component: WhatsappReportPage,
+          meta: { requiresAuth: true, roles: ['admin'] },
+        },
+        {
+          path: 'settings',
+          name: 'AdminSettings',
+          component: WhatsappReportPage,
+          meta: { requiresAuth: true, roles: ['admin'] },
         },
       ],
     },

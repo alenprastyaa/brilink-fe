@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { useApi } from '@/composables/useApi'
@@ -22,6 +22,8 @@ const currentPage = ref(1)
 const itemsPerPage = 8
 const selectedKtpPreview = ref(null)
 const ocrMessage = ref('')
+const searchQuery = ref('')
+const isFormModalOpen = ref(false)
 
 const createEmptyForm = () => ({
   withdrawal_name: '',
@@ -135,14 +137,14 @@ const handleFileChange = async (event) => {
   isOcrLoading.value = true
   ocrMessage.value = 'Membaca data KTP...'
   try {
-    const fileData = await fileToDataUrl(file)
+    const fileData = await fileToOptimizedOcrDataUrl(file)
     const result = await post(
       '/withdrawals/ocr-ktp',
       {
         ktp_file_name: file.name,
         ktp_file_data: fileData,
       },
-      { timeout: 60000 },
+      { timeout: 120000 },
     )
 
     applyOcrResult(result)
@@ -166,10 +168,41 @@ const fileToDataUrl = (file) =>
     reader.readAsDataURL(file)
   })
 
+const fileToOptimizedOcrDataUrl = (file) =>
+  new Promise((resolve) => {
+    const image = new Image()
+    const objectUrl = URL.createObjectURL(file)
+
+    image.onload = () => {
+      const maxWidth = 1400
+      const scale = Math.min(1, maxWidth / image.width)
+      const width = Math.round(image.width * scale)
+      const height = Math.round(image.height * scale)
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+
+      canvas.width = width
+      canvas.height = height
+      context.drawImage(image, 0, 0, width, height)
+      URL.revokeObjectURL(objectUrl)
+      resolve(canvas.toDataURL('image/jpeg', 0.82))
+    }
+
+    image.onerror = async () => {
+      URL.revokeObjectURL(objectUrl)
+      resolve(await fileToDataUrl(file))
+    }
+
+    image.src = objectUrl
+  })
+
 const fetchWithdrawals = async () => {
   isLoading.value = true
   try {
-    const response = await get('/withdrawals')
+    const keyword = searchQuery.value.trim()
+    const response = await get('/withdrawals', {
+      params: keyword ? { search: keyword } : {},
+    })
     withdrawals.value = response.withdrawals || []
     currentPage.value = 1
   } catch (error) {
@@ -222,6 +255,15 @@ const closeKtpPreview = () => {
   selectedKtpPreview.value = null
 }
 
+const openFormModal = () => {
+  isFormModalOpen.value = true
+}
+
+const closeFormModal = () => {
+  if (isSubmitting.value || isOcrLoading.value) return
+  isFormModalOpen.value = false
+}
+
 const handleSubmit = async () => {
   if (!form.value.withdrawal_name.trim()) {
     showAlert('Validasi', 'Nama penarik harus diisi.', 'warning')
@@ -269,6 +311,7 @@ const handleSubmit = async () => {
 
     await showAlert('Berhasil', 'Data tarik uang berhasil disimpan.', 'success')
     resetForm()
+    isFormModalOpen.value = false
     await fetchWithdrawals()
   } catch (error) {
     console.error('Failed to create withdrawal:', error)
@@ -296,30 +339,73 @@ const deleteWithdrawal = async (withdrawal) => {
   }
 }
 
+let searchTimeout = null
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(fetchWithdrawals, 350)
+})
+
 onMounted(fetchWithdrawals)
-onBeforeUnmount(clearPreview)
+onBeforeUnmount(() => {
+  clearTimeout(searchTimeout)
+  clearPreview()
+})
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 px-4 py-4 mt-10">
-    <div class="mx-auto space-y-4">
-      <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <div class="mb-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+  <div class="withdrawal-page min-h-screen bg-slate-50 px-4 py-4 mt-10">
+    <div class="mx-auto space-y-3">
+      <section class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+              Tarik Uang
+            </p>
+            <h1 class="mt-1 text-base font-bold text-slate-900">Riwayat Tarik Uang</h1>
+          </div>
+          <button type="button"
+            class="rounded-xl bg-blue-600 px-3 py-2 text-[11px] font-semibold text-white shadow-sm active:scale-[0.99]"
+            @click="openFormModal">
             Tarik Uang
-          </p>
-          <h1 class="mt-1 text-2xl font-bold text-slate-900">Form Tarik Uang</h1>
+          </button>
         </div>
       </section>
 
-      <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <form class="space-y-3" @submit.prevent="handleSubmit">
+      <div v-if="isFormModalOpen" class="fixed inset-0 z-[90] bg-black/60 px-4 py-6" @click="closeFormModal">
+        <section class="relative mx-auto flex max-h-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" @click.stop>
+          <div v-if="isOcrLoading || isSubmitting"
+            class="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/55 px-5 backdrop-blur-sm">
+            <div class="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl">
+              <div class="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600"></div>
+              <div class="mt-4 text-base font-bold text-slate-950">
+                {{ isSubmitting ? 'Menyimpan data...' : 'Membaca KTP...' }}
+              </div>
+              <p class="mt-2 text-sm font-medium leading-relaxed text-slate-700">
+                {{ isSubmitting ? 'Mohon tunggu sampai proses submit selesai.' : 'OCR sedang membaca foto KTP dan mengisi data otomatis.' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="sticky top-0 z-[1] flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Form Tarik Uang</h2>
+              <p class="text-xs text-slate-500">Ambil foto KTP lalu lengkapi nominal.</p>
+            </div>
+            <button type="button"
+              class="inline-flex h-11 min-w-11 items-center justify-center rounded-full bg-rose-600 px-3 text-white shadow-lg disabled:opacity-50"
+              :disabled="isSubmitting || isOcrLoading"
+              @click="closeFormModal">
+              <span class="text-2xl leading-none">&times;</span>
+            </button>
+          </div>
+
+          <form class="withdrawal-form flex-1 space-y-2.5 overflow-auto p-4" @submit.prevent="handleSubmit">
           <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-700">KTP</label>
+            <label class="mb-1.5 block text-xs font-semibold text-slate-700">KTP</label>
             <input ref="fileInputRef" type="file" accept="image/*" capture="environment" class="hidden"
               @change="handleFileChange" />
             <button type="button"
-              class="flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm active:scale-[0.99]"
+              class="flex w-full items-center justify-center rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm active:scale-[0.99]"
               @click="fileInputRef?.click()">
               {{ selectedFile ? 'Ganti Foto KTP' : 'Ambil Foto KTP' }}
             </button>
@@ -331,78 +417,132 @@ onBeforeUnmount(clearPreview)
           </div>
 
           <div v-if="ocrMessage"
-            class="rounded-xl border px-3 py-2 text-sm"
+            class="rounded-xl border px-3 py-2 text-xs"
             :class="isOcrLoading ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'">
             {{ ocrMessage }}
           </div>
 
-          <FormField v-model="form.withdrawal_name" label="Nama" placeholder="Masukkan nama penarik" required />
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div class="mb-3">
+              <h2 class="text-xs font-semibold text-slate-900">Data OCR KTP</h2>
+              <p class="text-xs text-slate-500">Otomatis terisi dari KTP, bisa dikoreksi manual.</p>
+            </div>
+
+            <FormField v-model="form.ktp_nik" label="NIK" placeholder="Otomatis dari KTP" />
+
+            <FormField v-model="form.withdrawal_name" label="Nama" placeholder="Otomatis dari KTP" required />
+
+            <FormField v-model="form.ktp_birth_place" label="Tempat Lahir" placeholder="Otomatis dari KTP" />
+
+            <FormField v-model="form.ktp_birth_date" label="Tanggal Lahir" placeholder="Tanggal lahir" type="date" />
+
+            <div class="mb-4">
+              <label class="mb-1.5 block text-xs font-bold text-gray-700">Jenis Kelamin</label>
+              <select v-model="form.ktp_gender"
+                class="w-full rounded border px-3 py-2 text-xs text-gray-700 shadow focus:outline-none focus:shadow-outline">
+                <option value="">Pilih jenis kelamin</option>
+                <option value="LAKI-LAKI">LAKI-LAKI</option>
+                <option value="PEREMPUAN">PEREMPUAN</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-xs font-bold text-gray-700">Alamat</label>
+              <textarea v-model="form.ktp_address" rows="3" placeholder="Otomatis dari KTP"
+                class="w-full rounded border px-3 py-2 text-xs text-gray-700 shadow focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+          </div>
 
           <FormField v-model="form.amount" label="Nominal" placeholder="Masukkan nominal" type="text"
             :is-currency="true" required />
 
-          <div class="flex gap-3">
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button"
+              class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-50"
+              :disabled="isSubmitting || isOcrLoading"
+              @click="closeFormModal">
+              Tutup
+            </button>
             <button type="submit" :disabled="isSubmitting || isOcrLoading"
-              class="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+              class="col-span-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
               {{ isSubmitting ? 'Menyimpan...' : isOcrLoading ? 'Membaca KTP...' : 'Submit Tarik Uang' }}
             </button>
             <button type="button"
-              class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+              class="col-span-3 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700"
               @click="resetForm">
               Reset
             </button>
           </div>
-        </form>
-      </section>
+          </form>
+        </section>
+      </div>
 
-      <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <section class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200">
         <div class="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h2 class="text-lg font-semibold text-slate-900">Riwayat</h2>
-            <p class="text-sm text-slate-500">
+            <h2 class="text-sm font-semibold text-slate-900">Riwayat</h2>
+            <p class="text-xs text-slate-500">
               {{ isAdmin ? 'Semua data tampil di sini.' : 'Data yang Anda buat.' }}
             </p>
           </div>
           <button type="button"
-            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700"
             @click="fetchWithdrawals">
             Refresh
           </button>
+        </div>
+
+        <div class="mb-3">
+          <label class="mb-1.5 block text-xs font-semibold text-slate-700">Cari Data</label>
+          <div class="flex gap-2">
+            <input v-model="searchQuery" type="search" inputmode="search"
+              placeholder="Cari nama, NIK, atau nominal"
+              class="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs text-slate-700 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+            <button v-if="searchQuery" type="button"
+              class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700"
+              @click="searchQuery = ''">
+              Reset
+            </button>
+          </div>
         </div>
 
         <div v-if="isLoading" class="py-10 text-center text-sm text-slate-500">
           Memuat data...
         </div>
 
+        <div v-else-if="withdrawals.length === 0 && searchQuery" class="py-10 text-center text-sm text-slate-500">
+          Tidak ada data yang cocok dengan pencarian.
+        </div>
+
         <div v-else-if="withdrawals.length === 0" class="py-10 text-center text-sm text-slate-500">
           Belum ada data tarik uang.
         </div>
 
-        <div v-else class="space-y-3">
+        <div v-else class="space-y-2.5">
           <article v-for="withdrawal in paginatedWithdrawals" :key="withdrawal.withdrawal_id"
             class="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <div class="text-xs text-slate-500">
+                <div class="text-[11px] text-slate-500">
                   {{ format(new Date(withdrawal.created_at), 'dd MMM yyyy, HH:mm', { locale: id }) }}
                 </div>
-                <div class="mt-1 text-sm font-semibold text-slate-900">
+                <div class="mt-1 text-xs font-semibold text-slate-900">
                   {{ withdrawal.withdrawal_name }}
                 </div>
-                <div class="mt-1 text-sm font-semibold text-emerald-700">
+                <div class="mt-1 text-xs font-semibold text-emerald-700">
                   {{ formatCurrency(withdrawal.amount) }}
                 </div>
               </div>
 
               <div class="flex flex-col items-end gap-2">
                 <button type="button"
-                  class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-300"
+                  class="rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-300"
                   @click="openKtpPreview(withdrawal)">
                   Lihat KTP
                 </button>
 
                 <button v-if="isAdmin" type="button"
-                  class="rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white"
+                  class="rounded-lg bg-rose-600 px-3 py-2 text-[11px] font-semibold text-white"
                   @click="deleteWithdrawal(withdrawal)">
                   Hapus
                 </button>
@@ -411,26 +551,26 @@ onBeforeUnmount(clearPreview)
           </article>
 
           <div class="space-y-3 pt-2">
-            <div class="text-center text-xs font-medium text-slate-500">
+            <div class="text-center text-[11px] font-medium text-slate-500">
               {{ paginationSummary }}
             </div>
 
             <div class="flex items-center justify-between gap-2">
               <button type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
+                class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 disabled:opacity-50"
                 :disabled="currentPage === 1" @click="goToPage(1)">
                 Awal
               </button>
 
               <button type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
+                class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 disabled:opacity-50"
                 :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
                 ‹
               </button>
 
               <div class="flex flex-1 justify-center gap-2">
                 <button v-for="page in visiblePageNumbers" :key="page" type="button"
-                  class="h-10 min-w-10 rounded-lg px-3 text-sm font-semibold"
+                  class="h-9 min-w-9 rounded-lg px-2.5 text-xs font-semibold"
                   :class="page === currentPage ? 'bg-blue-600 text-white' : 'border border-slate-300 bg-white text-slate-700'"
                   @click="goToPage(page)">
                   {{ page }}
@@ -438,13 +578,13 @@ onBeforeUnmount(clearPreview)
               </div>
 
               <button type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
+                class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 disabled:opacity-50"
                 :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">
                 ›
               </button>
 
               <button type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
+                class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 disabled:opacity-50"
                 :disabled="currentPage === totalPages" @click="goToPage(totalPages)">
                 Akhir
               </button>
@@ -456,13 +596,13 @@ onBeforeUnmount(clearPreview)
 
     <div v-if="selectedKtpPreview" class="fixed inset-0 z-[100] bg-black/70 px-4 py-6" @click="closeKtpPreview">
       <div class="mx-auto flex h-full max-w-3xl flex-col rounded-2xl bg-white shadow-2xl" @click.stop>
-        <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
           <div>
-            <h3 class="text-base font-semibold text-slate-900">Preview KTP</h3>
-            <p class="text-sm text-slate-500">{{ selectedKtpPreview.withdrawal_name }}</p>
+            <h3 class="text-sm font-semibold text-slate-900">Preview KTP</h3>
+            <p class="text-xs text-slate-500">{{ selectedKtpPreview.withdrawal_name }}</p>
           </div>
           <button type="button"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700"
+            class="inline-flex h-11 min-w-11 items-center justify-center rounded-full bg-rose-600 px-3 text-white shadow-lg"
             @click="closeKtpPreview">
             <span class="text-2xl leading-none">&times;</span>
           </button>
@@ -492,9 +632,14 @@ onBeforeUnmount(clearPreview)
           </div>
         </div>
 
-        <div class="border-t border-slate-200 px-4 py-3">
+        <div class="grid grid-cols-2 gap-2 border-t border-slate-200 px-4 py-3">
+          <button type="button"
+            class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-xs font-semibold text-slate-700"
+            @click="closeKtpPreview">
+            Tutup
+          </button>
           <a :href="selectedKtpPreview.ktp_file_url" target="_blank" rel="noreferrer"
-            class="block rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white">
+            class="block rounded-xl bg-blue-600 px-4 py-3 text-center text-xs font-semibold text-white">
             Buka Gambar
           </a>
         </div>
@@ -502,3 +647,40 @@ onBeforeUnmount(clearPreview)
     </div>
   </div>
 </template>
+
+<style scoped>
+.withdrawal-page {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.withdrawal-page :deep(button),
+.withdrawal-page :deep(input),
+.withdrawal-page :deep(select),
+.withdrawal-page :deep(textarea) {
+  font-size: 12px;
+}
+
+.withdrawal-form :deep(label) {
+  margin-bottom: 0.375rem;
+  font-size: 0.6875rem;
+  line-height: 0.9rem;
+}
+
+.withdrawal-form :deep(input),
+.withdrawal-form :deep(select),
+.withdrawal-form :deep(textarea) {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 0.9rem;
+}
+
+.withdrawal-form :deep(.mb-4) {
+  margin-bottom: 0.625rem;
+}
+
+.withdrawal-form :deep(p) {
+  font-size: 0.6875rem;
+}
+</style>

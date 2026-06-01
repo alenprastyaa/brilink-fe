@@ -176,33 +176,33 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans text-sm text-gray-800">
-    <div class="container mx-auto py-6 px-4 max-w-full">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+  <div class="min-h-screen bg-gray-50 font-sans text-xs text-gray-800 sm:text-sm">
+    <div class="mx-auto max-w-full px-3 py-4 sm:px-4 sm:py-6">
+      <div class="mb-4 flex flex-col gap-3 md:mb-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Manajemen Bank & Pembayaran</h1>
-          <p class="text-gray-500">Kelola daftar bank dan metode pembayaran toko.</p>
+          <h1 class="text-lg font-bold text-gray-900 sm:text-2xl">Manajemen Bank & Pembayaran</h1>
+          <p class="text-xs text-gray-500 sm:text-sm">Kelola daftar bank dan metode pembayaran toko.</p>
         </div>
         <button
           @click="((showCreateModal = true), resetNewBankForm())"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium transition-colors shadow-sm"
+          class="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 md:w-auto md:px-5"
         >
           + Tambah Bank
         </button>
       </div>
 
-      <div class="bg-white rounded-lg shadow border border-gray-200">
+      <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
         <div
-          class="p-4 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4"
+          class="flex flex-col gap-3 border-b border-gray-200 bg-gray-50/50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4"
         >
-          <div class="flex items-center gap-3 w-full sm:w-auto">
-            <label for="store-filter" class="font-semibold text-gray-700 whitespace-nowrap"
+          <div class="flex w-full flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+            <label for="store-filter" class="whitespace-nowrap font-semibold text-gray-700"
               >Filter Toko:</label
             >
             <select
               id="store-filter"
               v-model="selectedStoreId"
-              class="w-full sm:w-64 border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              class="w-full rounded border border-gray-300 bg-white px-3 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-64 sm:py-1.5 sm:text-sm"
             >
               <option :value="null">Semua Toko</option>
               <option v-for="store in stores" :key="store.store_id" :value="store.store_id">
@@ -210,7 +210,7 @@ onMounted(async () => {
               </option>
             </select>
           </div>
-          <div class="text-gray-500">
+          <div class="text-xs text-gray-500 sm:text-sm">
             Total Data: <strong>{{ banks.length }}</strong>
           </div>
         </div>
@@ -221,8 +221,40 @@ onMounted(async () => {
           <p class="text-gray-500 mb-4">Belum ada data bank/pembayaran.</p>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+        <template v-else>
+          <div class="space-y-3 p-3 md:hidden">
+            <article
+              v-for="(bank, index) in banks"
+              :key="bank.bank_id"
+              class="rounded-xl border border-gray-200 bg-gray-50 p-3"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-[11px] text-gray-500">#{{ index + 1 }}</div>
+                  <div class="mt-1 text-sm font-semibold text-gray-900">{{ bank.bank_name }}</div>
+                  <div class="mt-1 text-xs text-gray-600">{{ bank.store_name || '-' }}</div>
+                  <div class="mt-1 text-[11px] text-gray-500">{{ formatDate(bank.created_at) }}</div>
+                </div>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button
+                  @click="openEditModal(bank)"
+                  class="rounded-lg border border-yellow-200 bg-white px-3 py-2 text-xs font-semibold text-yellow-700"
+                >
+                  Edit
+                </button>
+                <button
+                  @click="handleDeleteBank(bank.bank_id)"
+                  class="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700"
+                >
+                  Hapus
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <div class="hidden overflow-x-auto md:block">
+            <table class="w-full text-left border-collapse">
             <thead class="bg-gray-100 text-gray-700 border-b border-gray-200">
               <tr>
                 <th class="px-4 py-3 font-bold border-r border-gray-200 w-12 text-center">No</th>
@@ -269,42 +301,43 @@ onMounted(async () => {
                 </td>
               </tr>
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+        </template>
       </div>
 
       <div
         v-if="showCreateModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-3 sm:p-4"
         @click.self="showCreateModal = false"
       >
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md overflow-hidden">
-          <div class="bg-gray-100 px-4 py-3 border-b flex justify-between items-center">
-            <h3 class="font-bold text-gray-800">Tambah Bank Baru</h3>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-lg">
+          <div class="flex items-center justify-between border-b bg-gray-100 px-4 py-3">
+            <h3 class="text-sm font-bold text-gray-800 sm:text-base">Tambah Bank Baru</h3>
             <button
               @click="showCreateModal = false"
-              class="text-gray-500 hover:text-gray-800 font-bold text-lg"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-lg font-bold text-white shadow"
             >
               &times;
             </button>
           </div>
 
-          <form @submit.prevent="handleCreateBank" class="p-4 space-y-4">
+          <form @submit.prevent="handleCreateBank" class="space-y-3 p-4 sm:space-y-4">
             <div>
-              <label class="block font-medium mb-1">Nama Bank/Pembayaran</label>
+              <label class="mb-1 block font-medium">Nama Bank/Pembayaran</label>
               <input
                 type="text"
                 v-model="newBank.bank_name"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                class="w-full rounded border border-gray-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none sm:text-sm"
                 placeholder="Contoh: BCA, OVO"
                 required
               />
             </div>
             <div>
-              <label class="block font-medium mb-1">Pilih Toko</label>
+              <label class="mb-1 block font-medium">Pilih Toko</label>
               <select
                 v-model="newBank.store_id"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 bg-white"
+                class="w-full rounded border border-gray-300 bg-white px-3 py-2 text-xs focus:border-blue-500 focus:outline-none sm:text-sm"
                 required
               >
                 <option :value="null" disabled>-- Pilih Toko --</option>
@@ -314,18 +347,18 @@ onMounted(async () => {
               </select>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2">
+            <div class="grid grid-cols-2 gap-2 pt-2">
               <button
                 type="button"
                 @click="showCreateModal = false"
-                class="px-4 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300"
+                class="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {{ isSubmitting ? 'Menyimpan...' : 'Simpan' }}
               </button>
@@ -336,55 +369,55 @@ onMounted(async () => {
 
       <div
         v-if="showEditModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-3 sm:p-4"
         @click.self="showEditModal = false"
       >
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md overflow-hidden">
-          <div class="bg-gray-100 px-4 py-3 border-b flex justify-between items-center">
-            <h3 class="font-bold text-gray-800">Edit Bank</h3>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-lg">
+          <div class="flex items-center justify-between border-b bg-gray-100 px-4 py-3">
+            <h3 class="text-sm font-bold text-gray-800 sm:text-base">Edit Bank</h3>
             <button
               @click="showEditModal = false"
-              class="text-gray-500 hover:text-gray-800 font-bold text-lg"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-lg font-bold text-white shadow"
             >
               &times;
             </button>
           </div>
 
-          <form @submit.prevent="handleUpdateBank" class="p-4 space-y-4">
+          <form @submit.prevent="handleUpdateBank" class="space-y-3 p-4 sm:space-y-4">
             <div>
-              <label class="block font-medium mb-1">Nama Bank/Pembayaran</label>
+              <label class="mb-1 block font-medium">Nama Bank/Pembayaran</label>
               <input
                 type="text"
                 v-model="editingBank.bank_name"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                class="w-full rounded border border-gray-300 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none sm:text-sm"
                 required
               />
             </div>
 
             <div v-if="editingBank.store_id">
-              <label class="block font-medium mb-1 text-gray-500"
+              <label class="mb-1 block font-medium text-gray-500"
                 >ID Toko (Tidak dapat diubah)</label
               >
               <input
                 type="text"
                 :value="editingBank.store_id"
                 readonly
-                class="w-full border border-gray-300 bg-gray-100 text-gray-500 rounded px-3 py-2 cursor-not-allowed"
+                class="w-full cursor-not-allowed rounded border border-gray-300 bg-gray-100 px-3 py-2 text-xs text-gray-500 sm:text-sm"
               />
             </div>
 
-            <div class="flex justify-end gap-2 pt-2">
+            <div class="grid grid-cols-2 gap-2 pt-2">
               <button
                 type="button"
                 @click="showEditModal = false"
-                class="px-4 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300"
+                class="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {{ isSubmitting ? 'Menyimpan...' : 'Update' }}
               </button>

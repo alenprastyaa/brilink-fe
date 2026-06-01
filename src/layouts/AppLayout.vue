@@ -12,19 +12,14 @@ const syncSidebarWithViewport = () => {
 
   isDesktopViewport.value = nextIsDesktop
   isSidebarOpen.value = nextIsDesktop
-  console.log('[sidebar] viewport sync state:', isSidebarOpen.value)
 }
 
 const openSidebar = () => {
-  console.log('[sidebar] open requested')
   isSidebarOpen.value = true
-  console.log('[sidebar] state:', isSidebarOpen.value)
 }
 
 const closeSidebar = () => {
-  console.log('[sidebar] close requested')
   isSidebarOpen.value = false
-  console.log('[sidebar] state:', isSidebarOpen.value)
 }
 
 onMounted(() => {
@@ -51,7 +46,10 @@ onUnmounted(() => {
 
 <style scoped>
 .main-content {
-  margin-left: 300px;
+  margin-left: 288px;
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 @media (max-width: 767px) {

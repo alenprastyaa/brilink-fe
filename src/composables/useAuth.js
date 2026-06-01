@@ -2,10 +2,12 @@
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { watchEffect } from 'vue'
+import { storeToRefs } from 'pinia'
 
 export function useAuth() {
   const authStore = useAuthStore()
   const router = useRouter()
+  const { isAuthenticated, isAdmin, isKaryawan, user, getUserId } = storeToRefs(authStore)
 
   watchEffect(() => {
     authStore.setAuthHeader()
@@ -27,11 +29,11 @@ export function useAuth() {
   }
 
   return {
-    isAuthenticated: authStore.isAuthenticated,
-    isAdmin: authStore.isAdmin,
-    isKaryawan: authStore.isKaryawan,
-    user: authStore.user,
-    getUserId: authStore.getUserId,
+    isAuthenticated,
+    isAdmin,
+    isKaryawan,
+    user,
+    getUserId,
     login,
     logout,
   }

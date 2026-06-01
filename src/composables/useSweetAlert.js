@@ -24,8 +24,39 @@ export function useSweetAlert() {
     })
   }
 
+  const showToast = (title, icon = 'success', text = '') => {
+    return Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title,
+      text,
+      showConfirmButton: false,
+      timer: 3200,
+      timerProgressBar: true,
+    })
+  }
+
+  const showToastConfirm = (title, text = '', confirmButtonText = 'Install') => {
+    return Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'question',
+      title,
+      text,
+      showCancelButton: true,
+      confirmButtonText,
+      cancelButtonText: 'Nanti',
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#64748b',
+      timer: undefined,
+    })
+  }
+
   return {
     showAlert,
     showConfirm,
+    showToast,
+    showToastConfirm,
   }
 }

@@ -351,8 +351,8 @@ const resetFilter = () => {
 </script>
 
 <template>
-  <div class="container mx-auto py-6 px-4 text-[12px] text-gray-800">
-    <div class="flex justify-between items-end mt-5">
+  <div class="mx-auto px-3 py-4 text-[12px] text-gray-800 sm:px-4 lg:px-6">
+    <div class="mt-2 flex justify-between sm:mt-5">
       <div class="text-right bg-white p-2 rounded border border-gray-200 shadow-sm">
         <div class="text-[10px] text-gray-500 uppercase tracking-wider">Total Profit Terfilter</div>
         <div class="font-bold text-[14px]" :class="getProfitColor(totalOverallProfit)">
@@ -361,8 +361,8 @@ const resetFilter = () => {
       </div>
     </div>
 
-    <div class="bg-white p-4 rounded border border-gray-200 mb-6 shadow-sm">
-      <div class="flex flex-col md:flex-row gap-4 items-end">
+    <div class="mb-4 rounded border border-gray-200 bg-white p-3 shadow-sm sm:mb-6 sm:p-4">
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-4 md:items-end">
         <div class="flex-1 w-full">
           <label class="block mb-1 font-medium">Toko</label>
           <select
@@ -390,16 +390,16 @@ const resetFilter = () => {
             class="w-full border border-gray-300 rounded px-3 py-2 text-[12px]"
           />
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 md:justify-end">
           <button
             @click="resetFilter"
-            class="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 font-medium"
+            class="flex-1 rounded bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200 md:flex-none"
           >
             Reset
           </button>
           <button
             @click="fetchReports"
-            class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-medium"
+            class="flex-1 rounded bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 md:flex-none"
           >
             Filter
           </button>
@@ -407,8 +407,80 @@ const resetFilter = () => {
       </div>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
+    <div class="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+      <div v-if="isLoading" class="py-8 text-center text-gray-500">Memuat data tabel...</div>
+      <div v-else-if="reports.length === 0" class="py-8 text-center text-gray-500">
+        Tidak ada laporan ditemukan.
+      </div>
+
+      <div v-else class="space-y-3 p-3 md:hidden">
+        <article
+          v-for="(report, index) in reports"
+          :key="report.report_id"
+          class="rounded-xl border border-gray-200 bg-gray-50 p-3"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-[11px] text-gray-500">
+                #{{ (currentPage - 1) * itemsPerPage + index + 1 }} • {{ formatDate(report.report_date) }}
+              </div>
+              <div class="mt-1 text-sm font-semibold text-gray-900">{{ report.store_name }}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-gray-500">Profit</div>
+              <div class="font-mono text-xs font-bold" :class="getProfitColor(report.profit_today)">
+                {{ formatCurrency(report.profit_today) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div class="rounded-lg bg-white p-2">
+              <div class="text-gray-500">Saldo Bank</div>
+              <div class="mt-1 font-mono font-semibold text-gray-900">
+                {{ formatCurrency(report.total_balance) }}
+              </div>
+            </div>
+            <div class="rounded-lg bg-white p-2">
+              <div class="text-gray-500">Uang Nitip</div>
+              <div class="mt-1 font-mono font-semibold text-gray-900">
+                {{ formatCurrency(report.uang_nitip) }}
+              </div>
+            </div>
+            <div class="col-span-2 rounded-lg bg-white p-2">
+              <div class="text-gray-500">Total Saldo</div>
+              <div class="mt-1 font-mono font-bold text-gray-900">
+                {{ formatCurrency(report.total_balance + (report.uang_nitip || 0)) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button
+              @click="openModal(report)"
+              class="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700"
+            >
+              Detail
+            </button>
+            <template v-if="isAdmin">
+              <button
+                @click="openEditModal(report)"
+                class="rounded-lg border border-yellow-200 bg-white px-3 py-2 text-xs font-semibold text-yellow-700"
+              >
+                Edit
+              </button>
+              <button
+                @click="deleteReport(report.report_id)"
+                class="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700"
+              >
+                Hapus
+              </button>
+            </template>
+          </div>
+        </article>
+      </div>
+
+      <div class="hidden overflow-x-auto md:block">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-100 text-gray-700 border-b border-gray-200">
@@ -423,14 +495,6 @@ const resetFilter = () => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr v-if="isLoading">
-              <td colspan="8" class="text-center py-8 text-gray-500">Memuat data tabel...</td>
-            </tr>
-            <tr v-else-if="reports.length === 0">
-              <td colspan="8" class="text-center py-8 text-gray-500">
-                Tidak ada laporan ditemukan.
-              </td>
-            </tr>
             <tr
               v-for="(report, index) in reports"
               :key="report.report_id"
@@ -501,9 +565,9 @@ const resetFilter = () => {
 
       <div
         v-if="reports.length > 0"
-        class="bg-gray-50 p-3 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4"
+        class="flex flex-col items-center justify-between gap-3 border-t border-gray-200 bg-gray-50 p-3 md:flex-row"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 text-xs">
           <span>Baris per hal:</span>
           <select
             v-model="itemsPerPage"
@@ -516,7 +580,7 @@ const resetFilter = () => {
             <option :value="100">100</option>
           </select>
         </div>
-        <div class="text-gray-600">
+        <div class="text-xs text-gray-600">
           Hal {{ currentPage }} dari {{ totalPages }} (Total {{ totalItems }})
         </div>
         <div class="flex gap-1">

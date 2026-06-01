@@ -316,12 +316,12 @@ const formatCurrency = (amount) => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-    <div class="container mx-auto px-4 py-8">
-      <div class="text-center mb-8">
+    <div class="mx-auto px-3 py-4 sm:px-4 sm:py-8">
+      <div class="mb-5 text-center sm:mb-8">
         <div
-          class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mb-4"
+          class="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 sm:mb-4 sm:h-16 sm:w-16"
         >
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="h-6 w-6 text-white sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -331,30 +331,30 @@ const formatCurrency = (amount) => {
           </svg>
         </div>
         <h1
-          class="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2"
+          class="mb-1 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-2xl font-bold text-transparent sm:mb-2 sm:text-4xl"
         >
           Laporan Harian
         </h1>
-        <p class="text-gray-600 text-lg">Buat laporan keuangan harian dengan mudah</p>
+        <p class="text-sm text-gray-600 sm:text-lg">Buat laporan keuangan harian dengan mudah</p>
       </div>
 
-      <div class="mb-8">
+      <div class="mb-5 sm:mb-8">
         <div class="flex justify-center">
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-1 sm:space-x-4">
             <div v-for="step in totalSteps" :key="step" class="flex items-center">
               <div
-                class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300"
+                class="flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 sm:h-10 sm:w-10"
                 :class="
                   step <= currentStep
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
                     : 'bg-gray-200 text-gray-400'
                 "
               >
-                <span class="text-sm font-semibold">{{ step }}</span>
+                <span class="text-xs font-semibold sm:text-sm">{{ step }}</span>
               </div>
               <div
                 v-if="step < totalSteps"
-                class="w-16 h-1 mx-2 transition-all duration-300"
+                class="mx-1 h-1 w-10 transition-all duration-300 sm:mx-2 sm:w-16"
                 :class="
                   step < currentStep
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600'
@@ -364,8 +364,8 @@ const formatCurrency = (amount) => {
             </div>
           </div>
         </div>
-        <div class="flex justify-center mt-4">
-          <div class="text-sm text-gray-600 text-center">
+        <div class="mt-3 flex justify-center sm:mt-4">
+          <div class="text-center text-xs text-gray-600 sm:text-sm">
             <span v-if="currentStep === 1">Informasi Dasar</span>
             <span v-else-if="currentStep === 2">Saldo Bank & Pembayaran</span>
             <span v-else>Konfirmasi</span>
@@ -373,15 +373,15 @@ const formatCurrency = (amount) => {
         </div>
       </div>
 
-      <div class="max-w-4xl mx-auto">
+      <div class="mx-auto max-w-4xl">
         <div
-          class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden"
+          class="overflow-hidden rounded-2xl border border-white/20 bg-white/80 shadow-lg backdrop-blur-sm sm:rounded-3xl sm:shadow-xl"
         >
           <form @submit.prevent="handleSubmitReport" @keydown.enter="handleEnterNavigation">
-            <div v-show="currentStep === 1" ref="step1Ref" class="p-8">
-              <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Informasi Dasar</h2>
-                <p class="text-gray-600">Pilih toko dan tanggal untuk laporan Anda</p>
+            <div v-show="currentStep === 1" ref="step1Ref" class="p-4 sm:p-8">
+              <div class="mb-4 sm:mb-6">
+                <h2 class="mb-1 text-lg font-semibold text-gray-800 sm:mb-2 sm:text-2xl">Informasi Dasar</h2>
+                <p class="text-sm text-gray-600 sm:text-base">Pilih toko dan tanggal untuk laporan Anda</p>
               </div>
 
               <div
@@ -413,7 +413,7 @@ const formatCurrency = (amount) => {
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-6">
                 <div class="space-y-2">
                   <FormField
                     label="Pilih Toko"
@@ -435,12 +435,12 @@ const formatCurrency = (amount) => {
                 </div>
               </div>
 
-              <div class="flex justify-end mt-8">
+              <div class="mt-5 flex justify-end sm:mt-8">
                 <button
                   type="button"
                   @click="nextStep"
                   :disabled="!canProceedToStep2 || stores.length === 0"
-                  class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
                 >
                   Lanjutkan
                   <svg
@@ -460,10 +460,10 @@ const formatCurrency = (amount) => {
               </div>
             </div>
 
-            <div v-show="currentStep === 2" ref="step2Ref" class="p-8">
-              <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Saldo Bank & Pembayaran</h2>
-                <p class="text-gray-600">Masukkan saldo untuk setiap metode pembayaran</p>
+            <div v-show="currentStep === 2" ref="step2Ref" class="p-4 sm:p-8">
+              <div class="mb-4 sm:mb-6">
+                <h2 class="mb-1 text-lg font-semibold text-gray-800 sm:mb-2 sm:text-2xl">Saldo Bank & Pembayaran</h2>
+                <p class="text-sm text-gray-600 sm:text-base">Masukkan saldo untuk setiap metode pembayaran</p>
               </div>
 
               <div
@@ -491,18 +491,18 @@ const formatCurrency = (amount) => {
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-6 sm:mb-6">
                 <div
                   v-for="(bankBalance, index) in reportForm.balances"
                   :key="bankBalance.bank_id"
-                  class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-200"
+                  class="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 transition-all duration-200 hover:shadow-md sm:p-6"
                 >
-                  <div class="flex items-center mb-4">
+                  <div class="mb-3 flex items-center sm:mb-4">
                     <div
-                      class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mr-4"
+                      class="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-green-400 to-blue-500 sm:mr-4 sm:h-12 sm:w-12"
                     >
                       <svg
-                        class="w-6 h-6 text-white"
+                        class="h-5 w-5 text-white sm:h-6 sm:w-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -515,7 +515,7 @@ const formatCurrency = (amount) => {
                         />
                       </svg>
                     </div>
-                    <h3 class="font-semibold text-gray-800">{{ bankBalance.bank_name }}</h3>
+                    <h3 class="text-sm font-semibold text-gray-800 sm:text-base">{{ bankBalance.bank_name }}</h3>
                   </div>
                   <FormField
                     :label="`Saldo ${bankBalance.bank_name}`"
@@ -528,7 +528,7 @@ const formatCurrency = (amount) => {
                 </div>
               </div>
 
-              <div class="mb-6">
+              <div class="mb-4 sm:mb-6">
                 <FormField
                   label="Jumlah Uang Nitip (Jika ada)"
                   type="text"
@@ -539,7 +539,7 @@ const formatCurrency = (amount) => {
                 />
               </div>
 
-              <div class="mb-10">
+              <div class="mb-6 sm:mb-10">
                 <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1"
                   >Keterangan</label
                 >
@@ -554,36 +554,36 @@ const formatCurrency = (amount) => {
               </div>
 
               <div
-                class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6"
+                class="mb-5 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:mb-6 sm:p-6"
               >
-                <h3 class="text-lg font-semibold text-blue-900 mb-4">Ringkasan</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 class="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">Ringkasan</h3>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                   <div class="text-center">
-                    <p class="text-sm text-blue-700 mb-1">Total Saldo</p>
-                    <p class="text-2xl font-bold text-blue-900">
+                    <p class="mb-1 text-xs text-blue-700 sm:text-sm">Total Saldo</p>
+                    <p class="text-lg font-bold text-blue-900 sm:text-2xl">
                       {{ formatCurrency(totalBalance) }}
                     </p>
                   </div>
                   <div class="text-center">
-                    <p class="text-sm text-blue-700 mb-1">Bank Terisi</p>
-                    <p class="text-2xl font-bold text-blue-900">
+                    <p class="mb-1 text-xs text-blue-700 sm:text-sm">Bank Terisi</p>
+                    <p class="text-lg font-bold text-blue-900 sm:text-2xl">
                       {{ filledBanks }} / {{ banks.length }}
                     </p>
                   </div>
                   <div class="text-center sm:col-span-2">
-                    <p class="text-sm text-blue-700 mb-1">Uang Nitip</p>
-                    <p class="text-2xl font-bold text-blue-900">
+                    <p class="mb-1 text-xs text-blue-700 sm:text-sm">Uang Nitip</p>
+                    <p class="text-lg font-bold text-blue-900 sm:text-2xl">
                       {{ formatCurrency(reportForm.uang_nitip) }}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div class="flex justify-between">
+              <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
                 <button
                   type="button"
                   @click="prevStep"
-                  class="px-6 py-3 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-600 transition-colors duration-200"
+                  class="rounded-xl bg-gray-500 px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-gray-600"
                 >
                   <svg
                     class="w-5 h-5 mr-2 inline"
@@ -604,7 +604,7 @@ const formatCurrency = (amount) => {
                   type="button"
                   @click="nextStep"
                   :disabled="(filledBanks === 0 && banks.length > 0) || banks.length === 0"
-                  class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  class="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Lanjutkan
                   <svg
@@ -624,21 +624,21 @@ const formatCurrency = (amount) => {
               </div>
             </div>
 
-            <div v-show="currentStep === 3" ref="step3Ref" class="p-8">
-              <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Konfirmasi Laporan</h2>
-                <p class="text-gray-600">Periksa kembali data laporan sebelum menyimpan</p>
+            <div v-show="currentStep === 3" ref="step3Ref" class="p-4 sm:p-8">
+              <div class="mb-4 sm:mb-6">
+                <h2 class="mb-1 text-lg font-semibold text-gray-800 sm:mb-2 sm:text-2xl">Konfirmasi Laporan</h2>
+                <p class="text-sm text-gray-600 sm:text-base">Periksa kembali data laporan sebelum menyimpan</p>
               </div>
 
-              <div class="space-y-6">
+              <div class="space-y-4 sm:space-y-6">
                 <div
-                  class="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-6"
+                  class="rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white p-4 sm:p-6"
                 >
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Dasar</h3>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <h3 class="mb-3 text-base font-semibold text-gray-800 sm:mb-4 sm:text-lg">Informasi Dasar</h3>
+                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                     <div>
-                      <p class="text-sm text-gray-600">Toko</p>
-                      <p class="font-semibold text-gray-800">
+                      <p class="text-xs text-gray-600 sm:text-sm">Toko</p>
+                      <p class="text-sm font-semibold text-gray-800 sm:text-base">
                         {{
                           storeOptions.find((s) => s.value === reportForm.store_id)?.label ||
                           'Tidak dipilih'
@@ -646,21 +646,21 @@ const formatCurrency = (amount) => {
                       </p>
                     </div>
                     <div>
-                      <p class="text-sm text-gray-600">Tanggal</p>
-                      <p class="font-semibold text-gray-800">{{ reportForm.report_date }}</p>
+                      <p class="text-xs text-gray-600 sm:text-sm">Tanggal</p>
+                      <p class="text-sm font-semibold text-gray-800 sm:text-base">{{ reportForm.report_date }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div
-                  class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6"
+                  class="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6"
                 >
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Saldo</h3>
+                  <h3 class="mb-3 text-base font-semibold text-gray-800 sm:mb-4 sm:text-lg">Detail Saldo</h3>
                   <div class="space-y-3">
                     <div
                       v-for="balance in reportForm.balances.filter((b) => (b.saldo || 0) > 0)"
                       :key="balance.bank_id"
-                      class="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"
+                      class="flex items-center justify-between gap-3 border-b border-gray-200 py-2 text-sm last:border-b-0"
                     >
                       <span class="text-gray-700">{{ balance.bank_name }}</span>
                       <span class="font-semibold text-gray-900">{{
@@ -668,16 +668,16 @@ const formatCurrency = (amount) => {
                       }}</span>
                     </div>
                   </div>
-                  <div class="mt-4 pt-4 border-t border-gray-300">
-                    <div class="flex justify-between items-center mb-2">
-                      <span class="text-lg font-semibold text-gray-800">Total Saldo Bank</span>
-                      <span class="text-xl font-bold text-green-600">{{
+                  <div class="mt-4 border-t border-gray-300 pt-4">
+                    <div class="mb-2 flex items-center justify-between gap-3">
+                      <span class="text-sm font-semibold text-gray-800 sm:text-lg">Total Saldo Bank</span>
+                      <span class="text-sm font-bold text-green-600 sm:text-xl">{{
                         formatCurrency(totalBalance)
                       }}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                      <span class="text-lg font-semibold text-gray-800">Jumlah Uang Nitip</span>
-                      <span class="text-xl font-bold text-green-600">{{
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-sm font-semibold text-gray-800 sm:text-lg">Jumlah Uang Nitip</span>
+                      <span class="text-sm font-bold text-green-600 sm:text-xl">{{
                         formatCurrency(reportForm.uang_nitip)
                       }}</span>
                     </div>
@@ -695,11 +695,11 @@ const formatCurrency = (amount) => {
                 </div>
               </div>
 
-              <div class="flex justify-between mt-8">
+              <div class="mt-5 flex flex-col-reverse gap-2 sm:mt-8 sm:flex-row sm:justify-between">
                 <button
                   type="button"
                   @click="prevStep"
-                  class="px-6 py-3 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-600 transition-colors duration-200"
+                  class="rounded-xl bg-gray-500 px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-gray-600"
                 >
                   <svg
                     class="w-5 h-5 mr-2 inline"
@@ -719,7 +719,7 @@ const formatCurrency = (amount) => {
                 <button
                   type="submit"
                   :disabled="!canSubmit || isLoading"
-                  class="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center"
+                  class="flex items-center justify-center rounded-xl bg-gradient-to-r from-green-600 to-blue-600 px-8 py-3 font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <svg
                     v-if="isLoading"
