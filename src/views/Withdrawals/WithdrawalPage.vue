@@ -99,13 +99,52 @@ const handleFileChange = (event) => {
   previewUrl.value = URL.createObjectURL(file)
 }
 
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(new Error('Gagal membaca file KTP.'))
-    reader.readAsDataURL(file)
+const uploadKtpToR2 = async (file) => {
+  const chunkUpload = await post('/withdrawals/ktp-chunk-upload', {
+    ktp_file_name: file.name,
+    ktp_mime_type: file.type,
+    ktp_file_size: file.size,
+  }, {
+    timeout: 60000,
   })
+
+  const chunkSize = Number(chunkUpload.chunk_size) || 512 * 1024
+  let chunkIndex = 0
+
+  for (let offset = 0; offset < file.size; offset += chunkSize) {
+    const chunk = file.slice(offset, Math.min(offset + chunkSize, file.size))
+    const chunkData = await blobToBase64(chunk)
+    await post(
+      `/withdrawals/ktp-chunk-upload/${chunkUpload.upload_id}/chunks`,
+      {
+        chunk_index: chunkIndex,
+        chunk_data: chunkData,
+      },
+      {
+        timeout: 60000,
+      },
+    )
+    chunkIndex += 1
+  }
+
+  return post(`/withdrawals/ktp-chunk-upload/${chunkUpload.upload_id}/complete`, {}, {
+    timeout: 60000,
+  })
+}
+
+const blobToBase64 = async (blob) => {
+  const arrayBuffer = await blob.arrayBuffer()
+  const bytes = new Uint8Array(arrayBuffer)
+  let binary = ''
+  const batchSize = 0x8000
+
+  for (let index = 0; index < bytes.length; index += batchSize) {
+    const batch = bytes.subarray(index, index + batchSize)
+    binary += String.fromCharCode(...batch)
+  }
+
+  return btoa(binary)
+}
 
 const fetchWithdrawals = async () => {
   isLoading.value = true
@@ -203,12 +242,14 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
   try {
-    const fileData = await fileToDataUrl(selectedFile.value)
+    const uploadedKtp = await uploadKtpToR2(selectedFile.value)
+
     await post('/withdrawals', {
       withdrawal_name: form.value.withdrawal_name.trim(),
       amount: Number(form.value.amount),
       ktp_file_name: selectedFile.value.name,
-      ktp_file_data: fileData,
+      ktp_file_key: uploadedKtp.ktp_file_key,
+      ktp_file_url: uploadedKtp.ktp_file_url,
     })
 
     await showAlert('Berhasil', 'Data tarik uang berhasil disimpan.', 'success')
@@ -217,6 +258,9 @@ const handleSubmit = async () => {
     await fetchWithdrawals()
   } catch (error) {
     console.error('Failed to create withdrawal:', error)
+    if (!error.response) {
+      showAlert('Error', error.message || 'Gagal menyimpan data tarik uang.', 'error')
+    }
   } finally {
     isSubmitting.value = false
   }
