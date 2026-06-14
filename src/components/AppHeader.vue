@@ -1,17 +1,37 @@
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 
-const { user, logout } = useAuth()
+const props = defineProps({
+  showSidebarToggle: {
+    type: Boolean,
+    default: true,
+  },
+})
+
+const route = useRoute()
+const router = useRouter()
+const { user, logout, isKaryawan } = useAuth()
 const { showToast, showToastConfirm } = useSweetAlert()
 const emit = defineEmits(['open-sidebar'])
 const isDropdownOpen = ref(false)
 const installPromptEvent = ref(null)
 const canInstall = ref(false)
+const showBackButton = computed(() => isKaryawan.value && route.name !== 'Dashboard')
 
 const handleOpenSidebar = () => {
   emit('open-sidebar')
+}
+
+const handleBack = () => {
+  if (window.history.length > 1) {
+    router.back()
+    return
+  }
+
+  router.push({ name: 'Dashboard' })
 }
 
 const toggleDropdown = () => {
@@ -112,239 +132,159 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header
-    class="fixed top-0 left-0 right-0 z-50 h-16 bg-white backdrop-blur-md border-b border-gray-200/50 shadow-sm"
-  >
+  <header class="fixed top-0 left-0 right-0 z-50 h-16 bg-white backdrop-blur-md border-b border-gray-200/50 shadow-sm">
     <div class="flex h-16 items-center justify-between px-4 md:px-6">
       <!-- Logo Section -->
       <div class="flex items-center gap-3">
-        <button
-          type="button"
+        <button v-if="props.showSidebarToggle" type="button"
           class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm"
-          @click.stop="handleOpenSidebar"
-          aria-label="Buka menu"
-        >
+          @click.stop="handleOpenSidebar" aria-label="Buka menu">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <router-link
-          to="/"
-          class="flex items-center space-x-3 group transition-all duration-300 hover:scale-105"
-        >
+        <button v-else-if="showBackButton" type="button"
+          class="inline-flex h-10 items-center gap-2 rounded-xl border border-blue-700 bg-blue-600 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+          @click.stop="handleBack" aria-label="Kembali" title="Kembali">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>Kembali</span>
+        </button>
+
+        <router-link to="/" class="flex items-center space-x-3 group transition-all duration-300 hover:scale-105">
           <div>
-            <h1
-              class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
-            ></h1>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"></h1>
           </div>
         </router-link>
       </div>
 
       <div class="flex items-center gap-2">
-        <button
-          type="button"
+        <button type="button"
           class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-700 shadow-sm transition hover:bg-blue-100"
-          :title="canInstall ? 'Install aplikasi' : 'Petunjuk install aplikasi'"
-          aria-label="Install aplikasi"
-          @click.stop="handleInstallApp"
-        >
+          :title="canInstall ? 'Install aplikasi' : 'Petunjuk install aplikasi'" aria-label="Install aplikasi"
+          @click.stop="handleInstallApp">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 3v10m0 0l4-4m-4 4L8 9M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"
-            />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v10m0 0l4-4m-4 4L8 9M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
           </svg>
         </button>
 
         <!-- User Profile Section -->
         <div class="relative dropdown-container">
-        <button
-          @click="toggleDropdown"
-          class="flex items-center space-x-2 rounded-2xl border border-gray-200/50 bg-gray-50/50 p-2 transition-all duration-300 hover:border-gray-300/70 hover:bg-gray-100/70 group"
-          type="button"
-        >
-          <!-- Avatar -->
-          <div
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md transition-all duration-300 group-hover:shadow-lg"
-          >
-            <span class="text-white font-bold text-sm">
-              {{ user?.username?.charAt(0).toUpperCase() }}
-            </span>
-          </div>
+          <button @click="toggleDropdown"
+            class="flex items-center space-x-2 rounded-2xl border border-gray-200/50 bg-gray-50/50 p-2 transition-all duration-300 hover:border-gray-300/70 hover:bg-gray-100/70 group"
+            type="button">
+            <!-- Avatar -->
+            <div
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md transition-all duration-300 group-hover:shadow-lg">
+              <span class="text-white font-bold text-sm">
+                {{ user?.username?.charAt(0).toUpperCase() }}
+              </span>
+            </div>
 
-          <!-- User Info -->
-          <div class="hidden md:block text-left">
-            <p class="text-sm font-semibold text-gray-800">{{ user?.username }}</p>
-            <p class="text-xs text-gray-500 capitalize">
-              <span
-                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                :class="{
+            <!-- User Info -->
+            <div class="hidden md:block text-left">
+              <p class="text-sm font-semibold text-gray-800">{{ user?.username }}</p>
+              <p class="text-xs text-gray-500 capitalize">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" :class="{
                   'bg-blue-100 text-blue-800': user?.role !== 'karyawan',
                   'bg-green-100 text-green-800': user?.role === 'karyawan',
-                }"
-              >
-                {{ user?.role === 'karyawan' ? 'Penanggung Jawab' : user?.role }}
-              </span>
-            </p>
-          </div>
+                }">
+                  {{ user?.role === 'karyawan' ? 'Penanggung Jawab' : user?.role }}
+                </span>
+              </p>
+            </div>
 
-          <!-- Dropdown Arrow -->
-          <svg
-            class="w-4 h-4 text-gray-500 transition-transform duration-200 group-hover:text-gray-700"
-            :class="{ 'rotate-180': isDropdownOpen }"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            ></path>
-          </svg>
-        </button>
+            <!-- Dropdown Arrow -->
+            <svg class="w-4 h-4 text-gray-500 transition-transform duration-200 group-hover:text-gray-700"
+              :class="{ 'rotate-180': isDropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
 
-        <!-- Dropdown Menu -->
-        <Transition
-          enter-active-class="transition ease-out duration-200"
-          enter-from-class="transform opacity-0 scale-95"
-          enter-to-class="transform opacity-100 scale-100"
-          leave-active-class="transition ease-in duration-150"
-          leave-from-class="transform opacity-100 scale-100"
-          leave-to-class="transform opacity-0 scale-95"
-        >
-          <div
-            v-if="isDropdownOpen"
-            class="absolute right-0 mt-3 w-72 bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden z-50"
-          >
-            <!-- User Profile Header -->
-            <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
-              <div class="flex items-center space-x-3">
-                <div
-                  class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md"
-                >
-                  <span class="text-white font-bold text-lg">
-                    {{ user?.username?.charAt(0).toUpperCase() }}
-                  </span>
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-800">{{ user?.username }}</p>
-                  <p class="text-xs text-gray-500 capitalize">
-                    <span
-                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                      :class="{
+          <!-- Dropdown Menu -->
+          <Transition enter-active-class="transition ease-out duration-200"
+            enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-150" leave-from-class="transform opacity-100 scale-100"
+            leave-to-class="transform opacity-0 scale-95">
+            <div v-if="isDropdownOpen"
+              class="absolute right-0 mt-3 w-72 bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden z-50">
+              <!-- User Profile Header -->
+              <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                    <span class="text-white font-bold text-lg">
+                      {{ user?.username?.charAt(0).toUpperCase() }}
+                    </span>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-800">{{ user?.username }}</p>
+                    <p class="text-xs text-gray-500 capitalize">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" :class="{
                         'bg-blue-100 text-blue-800': user?.role !== 'karyawan',
                         'bg-green-100 text-green-800': user?.role === 'karyawan',
-                      }"
-                    >
-                      {{ user?.role === 'karyawan' ? 'Penanggung Jawab' : user?.role }}
-                    </span>
-                  </p>
+                      }">
+                        {{ user?.role === 'karyawan' ? 'Penanggung Jawab' : user?.role }}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
+
+              <!-- Menu Items -->
+              <div class="p-2">
+                <!-- Profile Link -->
+                <router-link to="/profile" @click="isDropdownOpen = false"
+                  class="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200 group">
+                  <div
+                    class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-200">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Profil Saya</span>
+                </router-link>
+
+                <!-- Settings Link -->
+                <router-link to="/settings" @click="isDropdownOpen = false"
+                  class="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200 group">
+                  <div
+                    class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors duration-200">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                      </path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Pengaturan</span>
+                </router-link>
+
+                <!-- Divider -->
+                <div class="my-2 border-t border-gray-100"></div>
+
+                <!-- Logout Button -->
+                <button @click="handleLogout" type="button"
+                  class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-50 transition-colors duration-200 group cursor-pointer"
+                  :disabled="false">
+                  <div
+                    class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors duration-200">
+                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                      </path>
+                    </svg>
+                  </div>
+                  <span class="text-sm font-medium text-red-600">Keluar</span>
+                </button>
+              </div>
             </div>
-
-            <!-- Menu Items -->
-            <div class="p-2">
-              <!-- Profile Link -->
-              <router-link
-                to="/profile"
-                @click="isDropdownOpen = false"
-                class="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200 group"
-              >
-                <div
-                  class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-200"
-                >
-                  <svg
-                    class="w-4 h-4 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    ></path>
-                  </svg>
-                </div>
-                <span class="text-sm font-medium text-gray-700">Profil Saya</span>
-              </router-link>
-
-              <!-- Settings Link -->
-              <router-link
-                to="/settings"
-                @click="isDropdownOpen = false"
-                class="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200 group"
-              >
-                <div
-                  class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors duration-200"
-                >
-                  <svg
-                    class="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    ></path>
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    ></path>
-                  </svg>
-                </div>
-                <span class="text-sm font-medium text-gray-700">Pengaturan</span>
-              </router-link>
-
-              <!-- Divider -->
-              <div class="my-2 border-t border-gray-100"></div>
-
-              <!-- Logout Button -->
-              <button
-                @click="handleLogout"
-                type="button"
-                class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-50 transition-colors duration-200 group cursor-pointer"
-                :disabled="false"
-              >
-                <div
-                  class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors duration-200"
-                >
-                  <svg
-                    class="w-4 h-4 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    ></path>
-                  </svg>
-                </div>
-                <span class="text-sm font-medium text-red-600">Keluar</span>
-              </button>
-            </div>
-          </div>
-        </Transition>
+          </Transition>
         </div>
       </div>
     </div>

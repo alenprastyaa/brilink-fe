@@ -9,6 +9,7 @@ import ReportCreationPage from '@/views/Reports/ReportCreationPage.vue'
 import ReportListPage from '@/views/Reports/ReportListPage.vue'
 import ProfitAnalysisPage from '@/views/Analytics/ProfitAnalysisPage.vue'
 import WithdrawalPage from '@/views/Withdrawals/WithdrawalPage.vue'
+import DepositPage from '@/views/Deposits/DepositPage.vue'
 import WhatsappReportPage from '@/views/WhatsappReports/WhatsappReportPage.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
@@ -92,6 +93,12 @@ const router = createRouter({
           path: 'withdrawals',
           name: 'WithdrawalManagement',
           component: WithdrawalPage,
+          meta: { requiresAuth: true, roles: ['admin', 'karyawan'] },
+        },
+        {
+          path: 'deposits',
+          name: 'DepositManagement',
+          component: DepositPage,
           meta: { requiresAuth: true, roles: ['admin', 'karyawan'] },
         },
         {

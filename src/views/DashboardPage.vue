@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen max-w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-4 sm:px-4 lg:px-6">
+  <KaryawanDashboardPage v-if="isKaryawan" />
+
+  <div v-else class="min-h-screen max-w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-4 sm:px-4 lg:px-6">
     <div class="mb-3 sm:mb-6"></div>
 
     <div v-if="loading" class="flex items-center justify-center h-64">
@@ -478,6 +480,10 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
 import Chart from 'chart.js/auto'
+import { useAuth } from '@/composables/useAuth'
+import KaryawanDashboardPage from '@/views/KaryawanDashboardPage.vue'
+
+const { isAdmin, isKaryawan } = useAuth()
 
 // --- State Reaktif ---
 const data = ref(null)
@@ -698,14 +704,16 @@ const initCharts = async () => {
 // --- Lifecycle Hook & Watcher ---
 
 onMounted(() => {
-  fetchDashboardData()
+  if (isAdmin.value) {
+    fetchDashboardData()
+  }
 })
 
 // Panggil initCharts setiap kali data.value berubah dan tidak dalam mode loading
 watch(
   data,
   (newValue) => {
-    if (newValue) {
+    if (newValue && isAdmin.value) {
       initCharts()
     }
   },
