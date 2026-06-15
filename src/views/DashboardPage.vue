@@ -1,7 +1,8 @@
 <template>
   <KaryawanDashboardPage v-if="isKaryawan" />
 
-  <div v-else class="min-h-screen max-w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-4 sm:px-4 lg:px-6">
+  <div v-else
+    class="min-h-screen max-w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-4 sm:px-4 lg:px-6">
     <div class="mb-3 sm:mb-6"></div>
 
     <div v-if="loading" class="flex items-center justify-center h-64">
@@ -10,10 +11,8 @@
 
     <div v-else-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 text-center sm:p-6">
       <p class="text-red-600 font-semibold">{{ error }}</p>
-      <button
-        @click="fetchDashboardData"
-        class="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150"
-      >
+      <button @click="fetchDashboardData"
+        class="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150">
         Coba Lagi
       </button>
     </div>
@@ -27,18 +26,9 @@
               <p class="mt-1 text-xl font-bold text-gray-800 sm:mt-2 sm:text-3xl">{{ data.overview.total_stores }}</p>
             </div>
             <div class="rounded-full p-2 sm:p-4">
-              <svg
-                class="h-6 w-6 text-blue-600 sm:h-8 sm:w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
+              <svg class="h-6 w-6 text-blue-600 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
             </div>
           </div>
@@ -51,18 +41,9 @@
               <p class="mt-1 text-xl font-bold text-gray-800 sm:mt-2 sm:text-3xl">{{ data.overview.total_reports }}</p>
             </div>
             <div class="rounded-full p-2 sm:p-4">
-              <svg
-                class="h-6 w-6 text-green-600 sm:h-8 sm:w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
+              <svg class="h-6 w-6 text-green-600 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
           </div>
@@ -77,81 +58,47 @@
               </p>
             </div>
             <div class="shrink-0 rounded-full p-1 sm:p-4">
-              <svg
-                class="h-6 w-6 text-purple-600 sm:h-8 sm:w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+              <svg class="h-6 w-6 text-purple-600 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div
-          class="rounded-xl border-l-4 bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg"
-          :class="data.period.total_profit >= 0 ? 'border-emerald-600' : 'border-red-600'"
-        >
+        <div class="rounded-xl border-l-4 bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg"
+          :class="data.period.total_profit >= 0 ? 'border-emerald-600' : 'border-red-600'">
           <div class="flex min-w-0 items-center justify-between gap-2">
             <div class="min-w-0">
               <p class="text-xs font-medium text-gray-500 sm:text-sm">Profit (30 Hari)</p>
-              <p
-                class="mt-1 break-words text-[11px] font-bold sm:mt-2 sm:text-2xl"
-                :class="data.period.total_profit >= 0 ? 'text-emerald-600' : 'text-red-600'"
-              >
+              <p class="mt-1 break-words text-[11px] font-bold sm:mt-2 sm:text-2xl"
+                :class="data.period.total_profit >= 0 ? 'text-emerald-600' : 'text-red-600'">
                 {{ formatCurrency(data.period.total_profit) }}
               </p>
-              <p
-                class="mt-1 text-xs sm:text-sm"
-                :class="data.period.total_profit >= 0 ? 'text-emerald-600' : 'text-red-600'"
-              >
+              <p class="mt-1 text-xs sm:text-sm"
+                :class="data.period.total_profit >= 0 ? 'text-emerald-600' : 'text-red-600'">
                 {{ data.period.profit_percentage }}%
               </p>
             </div>
-            <div
-              class="shrink-0 rounded-full p-1 sm:p-4"
-              :class="data.period.total_profit >= 0 ? 'bg-emerald-100' : ''"
-            >
-              <svg
-                v-if="data.period.total_profit >= 0"
-                class="h-6 w-6 text-emerald-600 sm:h-8 sm:w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                />
+            <div class="shrink-0 rounded-full p-1 sm:p-4"
+              :class="data.period.total_profit >= 0 ? 'bg-emerald-100' : ''">
+              <svg v-if="data.period.total_profit >= 0" class="h-6 w-6 text-emerald-600 sm:h-8 sm:w-8" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
-              <svg
-                v-else
-                class="h-6 w-6 text-red-600 sm:h-8 sm:w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-                />
+              <svg v-else class="h-6 w-6 text-red-600 sm:h-8 sm:w-8" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="min-w-0 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white shadow-sm sm:p-6 sm:shadow-lg">
+      <div
+        class="min-w-0 overflow-hidden rounded-xl bg-blue-600 to-blue-700 p-4 text-white shadow-sm sm:p-6 sm:shadow-lg">
         <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <p class="text-xs font-medium text-blue-100 sm:text-sm">Periode Laporan</p>
@@ -166,7 +113,8 @@
             </div>
             <div class="min-w-0">
               <p class="text-xs text-blue-100 sm:text-sm">Rata-rata Saldo</p>
-              <p class="break-words text-[11px] font-bold sm:text-2xl">{{ formatCurrency(data.period.average_balance) }}</p>
+              <p class="break-words text-[11px] font-bold sm:text-2xl">{{ formatCurrency(data.period.average_balance) }}
+              </p>
             </div>
           </div>
         </div>
@@ -199,47 +147,42 @@
         <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Top 5 Toko Berdasarkan Saldo</h2>
 
         <div class="space-y-3 xl:hidden">
-          <article
-            v-for="(store, index) in data.top_stores"
-            :key="store.store_id"
-            class="min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-3"
-          >
+          <article v-for="(store, index) in data.top_stores" :key="store.store_id"
+            class="min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-3">
             <div class="flex min-w-0 items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <span
                     class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
-                    :class="
-                      index === 0
+                    :class="index === 0
                         ? 'bg-yellow-500'
                         : index === 1
                           ? 'bg-gray-400'
                           : index === 2
                             ? 'bg-orange-600'
                             : 'bg-gray-300'
-                    "
-                  >
+                      ">
                     {{ index + 1 }}
                   </span>
                   <h3 class="min-w-0 truncate text-sm font-semibold text-gray-900">{{ store.store_name }}</h3>
                 </div>
                 <p class="mt-2 text-xs text-gray-500">{{ store.total_reports }} laporan</p>
               </div>
-              <span
-                class="shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold"
-                :class="store.balance_growth >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-              >
+              <span class="shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold"
+                :class="store.balance_growth >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
                 {{ formatCurrency(store.balance_growth) }}
               </span>
             </div>
             <div class="mt-3 grid grid-cols-1 gap-2 text-xs xl:grid-cols-2">
               <div class="min-w-0 rounded-lg bg-white p-2">
                 <p class="text-gray-500">Rata-rata</p>
-                <p class="mt-1 break-words text-[11px] font-semibold text-gray-900">{{ formatCurrency(store.avg_balance) }}</p>
+                <p class="mt-1 break-words text-[11px] font-semibold text-gray-900">{{ formatCurrency(store.avg_balance)
+                  }}</p>
               </div>
               <div class="min-w-0 rounded-lg bg-white p-2">
                 <p class="text-gray-500">Saldo Maks</p>
-                <p class="mt-1 break-words text-[11px] font-semibold text-gray-900">{{ formatCurrency(store.max_balance) }}</p>
+                <p class="mt-1 break-words text-[11px] font-semibold text-gray-900">{{ formatCurrency(store.max_balance)
+                  }}</p>
               </div>
             </div>
           </article>
@@ -249,58 +192,41 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr class="bg-gray-50">
-                <th
-                  class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Peringkat
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Nama Toko
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Laporan
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Rata-rata Saldo
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Saldo Maks
                 </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Pertumbuhan
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr
-                v-for="(store, index) in data.top_stores"
-                :key="store.store_id"
-                class="hover:bg-gray-50 transition-colors"
-              >
+              <tr v-for="(store, index) in data.top_stores" :key="store.store_id"
+                class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <span
                       class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-sm"
-                      :class="
-                        index === 0
+                      :class="index === 0
                           ? 'bg-yellow-500'
                           : index === 1
                             ? 'bg-gray-400'
                             : index === 2
                               ? 'bg-orange-600'
                               : 'bg-gray-300'
-                      "
-                    >
+                        ">
                       {{ index + 1 }}
                     </span>
                   </div>
@@ -310,8 +236,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
-                  >
+                    class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                     {{ store.total_reports }} laporan
                   </span>
                 </td>
@@ -322,41 +247,18 @@
                   {{ formatCurrency(store.max_balance) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
-                    :class="
-                      store.balance_growth >= 0
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    "
-                  >
-                    <svg
-                      v-if="store.balance_growth >= 0"
-                      class="w-3 h-3 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 10l7-7m0 0l7 7m-7-7v18"
-                      />
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" :class="store.balance_growth >= 0
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                    ">
+                    <svg v-if="store.balance_growth >= 0" class="w-3 h-3 mr-1" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
-                    <svg
-                      v-else
-                      class="w-3 h-3 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                      />
+                    <svg v-else class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                     {{ formatCurrency(store.balance_growth) }}
                   </span>
@@ -370,17 +272,15 @@
       <div class="min-w-0 overflow-hidden rounded-xl bg-white p-4 shadow-sm sm:p-6 sm:shadow-lg">
         <h2 class="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-xl">Aktivitas Terbaru</h2>
         <div class="space-y-3 sm:space-y-4">
-          <div
-            v-for="activity in data.recent_activities.slice(0, 10)"
-            :key="activity.report_id"
-            class="flex min-w-0 flex-col gap-3 rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 sm:flex-row sm:items-center sm:justify-between sm:p-4"
-          >
+          <div v-for="activity in data.recent_activities.slice(0, 10)" :key="activity.report_id"
+            class="flex min-w-0 flex-col gap-3 rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="min-w-0 truncate text-sm font-semibold text-gray-800 sm:text-base">{{ activity.store_name }}</span>
+                <span class="min-w-0 truncate text-sm font-semibold text-gray-800 sm:text-base">{{ activity.store_name
+                  }}</span>
                 <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">{{
                   activity.creator_name
-                }}</span>
+                  }}</span>
               </div>
               <p class="mt-1 text-xs text-gray-600 sm:text-sm">{{ formatDate(activity.report_date) }}</p>
               <p v-if="activity.keterangan" class="text-xs text-gray-500 mt-1 truncate">
@@ -388,7 +288,8 @@
               </p>
             </div>
             <div class="min-w-0 flex-shrink-0 text-left sm:ml-4 sm:text-right">
-              <p class="break-words text-xs font-bold text-gray-800 sm:text-base">{{ formatCurrency(activity.total_balance) }}</p>
+              <p class="break-words text-xs font-bold text-gray-800 sm:text-base">{{
+                formatCurrency(activity.total_balance) }}</p>
               <p class="text-xs text-gray-500">{{ formatDateTime(activity.created_at) }}</p>
             </div>
           </div>
@@ -408,13 +309,13 @@
                 <span class="text-sm text-gray-600">Laporan:</span>
                 <span class="font-semibold">{{
                   data.monthly_comparison.current_month.total_reports
-                }}</span>
+                  }}</span>
               </div>
               <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Rata-rata:</span>
                 <span class="break-words text-right text-xs font-semibold sm:text-sm">{{
                   formatCurrency(data.monthly_comparison.current_month.avg_balance)
-                }}</span>
+                  }}</span>
               </div>
             </div>
           </div>
@@ -429,13 +330,13 @@
                 <span class="text-sm text-gray-600">Laporan:</span>
                 <span class="font-semibold">{{
                   data.monthly_comparison.last_month.total_reports
-                }}</span>
+                  }}</span>
               </div>
               <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Rata-rata:</span>
                 <span class="break-words text-right text-xs font-semibold sm:text-sm">{{
                   formatCurrency(data.monthly_comparison.last_month.avg_balance)
-                }}</span>
+                  }}</span>
               </div>
             </div>
           </div>
@@ -446,26 +347,18 @@
             <div class="space-y-2">
               <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Laporan:</span>
-                <span
-                  class="font-semibold"
-                  :class="
-                    data.monthly_comparison.growth.reports >= 0 ? 'text-green-600' : 'text-red-600'
-                  "
-                >
+                <span class="font-semibold" :class="data.monthly_comparison.growth.reports >= 0 ? 'text-green-600' : 'text-red-600'
+                  ">
                   {{ data.monthly_comparison.growth.reports >= 0 ? '+' : ''
                   }}{{ data.monthly_comparison.growth.reports }}
                 </span>
               </div>
               <div class="flex min-w-0 justify-between gap-2">
                 <span class="text-sm text-gray-600">Rata-rata:</span>
-                <span
-                  class="break-words text-right text-xs font-semibold sm:text-sm"
-                  :class="
-                    data.monthly_comparison.growth.avg_balance >= 0
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  "
-                >
+                <span class="break-words text-right text-xs font-semibold sm:text-sm" :class="data.monthly_comparison.growth.avg_balance >= 0
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                  ">
                   {{ formatCurrency(data.monthly_comparison.growth.avg_balance) }}
                 </span>
               </div>

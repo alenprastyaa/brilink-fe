@@ -83,7 +83,11 @@ export function useApi() {
           await handleUnauthorized()
           break
         case 403:
-          await handleForbidden(data?.message)
+          if (isAuthInvalidMessage(data?.message)) {
+            await handleUnauthorized()
+          } else {
+            await handleForbidden(data?.message)
+          }
           break
         case 404:
           await showAlert('Error!', data?.message || 'Data tidak ditemukan.', 'error')
@@ -128,12 +132,22 @@ export function useApi() {
   const handleUnauthorized = async () => {
     if (authStore.isAuthenticated) {
       await showAlert('Sesi Habis', 'Sesi Anda telah berakhir, silakan login kembali.', 'warning')
-      authStore.logout()
+      authStore.clearAuth()
       router.push('/login')
     } else {
       await showAlert('Akses Ditolak', 'Anda harus login untuk mengakses halaman ini.', 'error')
       router.push('/login')
     }
+  }
+
+  const isAuthInvalidMessage = (message = '') => {
+    const normalizedMessage = String(message).toLowerCase()
+    return (
+      normalizedMessage.includes('token tidak valid') ||
+      normalizedMessage.includes('kedaluwarsa') ||
+      normalizedMessage.includes('sesi tidak valid') ||
+      normalizedMessage.includes('login kembali')
+    )
   }
 
   // Handle forbidden access
