@@ -10,15 +10,10 @@ const { get, post } = useApi()
 const { showAlert } = useSweetAlert()
 const { isAdmin, user } = useAuth()
 
+const REPORT_DRAFT_STORAGE_KEY = 'report-creation-draft'
+
 const stores = ref([])
 const banks = ref([])
-const reportForm = ref({
-  store_id: '',
-  report_date: format(new Date(), 'yyyy-MM-dd'),
-  balances: [],
-  keterangan: '',
-  uang_nitip: 0,
-})
 const isLoading = ref(false)
 const isStoreFieldDisabled = ref(false)
 const currentStep = ref(1)
@@ -27,10 +22,88 @@ const selectedStoreId = ref(null)
 const step1Ref = ref(null)
 const step2Ref = ref(null)
 const step3Ref = ref(null)
+const isHydratingDraft = ref(false)
+const pendingDraft = ref(null)
 
 const newBank = ref({
   store_id: null,
 })
+
+const createReportForm = (overrides = {}) => ({
+  store_id: '',
+  report_date: format(new Date(), 'yyyy-MM-dd'),
+  balances: [],
+  keterangan: '',
+  uang_nitip: 0,
+  ...overrides,
+})
+
+const reportForm = ref(createReportForm())
+
+const createBalancesFromBanks = (sourceBalances = []) => {
+  const balancesByBankId = new Map(sourceBalances.map((balance) => [balance.bank_id, balance]))
+
+  return banks.value.map((bank) => {
+    const existingBalance = balancesByBankId.get(bank.bank_id)
+
+    return {
+      bank_id: bank.bank_id,
+      bank_name: bank.bank_name,
+      saldo: existingBalance?.saldo || 0,
+      keterangan: bank.keterangan,
+      uang_nitip: bank.uang_nitip,
+    }
+  })
+}
+
+const saveDraftToLocalStorage = () => {
+  if (typeof window === 'undefined' || isHydratingDraft.value) return
+
+  localStorage.setItem(
+    REPORT_DRAFT_STORAGE_KEY,
+    JSON.stringify({
+      selectedStoreId: selectedStoreId.value,
+      currentStep: currentStep.value,
+      reportForm: reportForm.value,
+    }),
+  )
+}
+
+const loadDraftFromLocalStorage = () => {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const storedDraft = localStorage.getItem(REPORT_DRAFT_STORAGE_KEY)
+    return storedDraft ? JSON.parse(storedDraft) : null
+  } catch (error) {
+    console.error('Failed to load report draft:', error)
+    return null
+  }
+}
+
+const clearDraftFromLocalStorage = () => {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(REPORT_DRAFT_STORAGE_KEY)
+}
+
+const applyDraftToForm = (draft) => {
+  if (!draft?.reportForm) return
+
+  isHydratingDraft.value = true
+
+  reportForm.value = createReportForm({
+    store_id: draft.reportForm.store_id || selectedStoreId.value || '',
+    report_date: draft.reportForm.report_date || format(new Date(), 'yyyy-MM-dd'),
+    balances: createBalancesFromBanks(draft.reportForm.balances || []),
+    keterangan: draft.reportForm.keterangan || '',
+    uang_nitip: draft.reportForm.uang_nitip || 0,
+  })
+
+  currentStep.value = Math.min(Math.max(draft.currentStep || 1, 1), totalSteps)
+
+  isHydratingDraft.value = false
+  saveDraftToLocalStorage()
+}
 
 const fetchStores = async () => {
   try {
@@ -69,18 +142,7 @@ const fetchBanks = async () => {
       response = await get('/banks')
     }
     banks.value = response.banks
-    reportForm.value.balances = banks.value.map((bank) => ({
-      bank_id: bank.bank_id,
-      bank_name: bank.bank_name,
-      saldo: 0,
-      keterangan: bank.keterangan,
-      uang_nitip: bank.uang_nitip,
-    }))
-
-    const currentBankIds = new Set(banks.value.map((b) => b.bank_id))
-    reportForm.value.balances = reportForm.value.balances.filter((b) =>
-      currentBankIds.has(b.bank_id),
-    )
+    reportForm.value.balances = createBalancesFromBanks(reportForm.value.balances)
   } catch (error) {
     console.error('Failed to fetch banks:', error)
     showAlert('Error', 'Gagal memuat daftar bank.', 'error')
@@ -90,9 +152,16 @@ watch(
   user,
   async (newUser) => {
     if (newUser) {
+      pendingDraft.value = loadDraftFromLocalStorage()
       await fetchStores()
 
-      if (!isAdmin.value && stores.value.length === 1) {
+      const draftStoreId = pendingDraft.value?.selectedStoreId || pendingDraft.value?.reportForm?.store_id
+      const hasDraftStore = stores.value.some((store) => store.store_id === draftStoreId)
+
+      if (hasDraftStore) {
+        selectedStoreId.value = draftStoreId
+        reportForm.value.store_id = draftStoreId
+      } else if (!isAdmin.value && stores.value.length === 1) {
         reportForm.value.store_id = stores.value[0].store_id
         isStoreFieldDisabled.value = true
         selectedStoreId.value = stores.value[0].store_id
@@ -100,9 +169,23 @@ watch(
         selectedStoreId.value = stores.value[0].store_id
       }
       await fetchBanks()
+
+      if (hasDraftStore) {
+        applyDraftToForm(pendingDraft.value)
+      }
+
+      pendingDraft.value = null
     }
   },
   { immediate: true },
+)
+
+watch(
+  [reportForm, selectedStoreId, currentStep],
+  () => {
+    saveDraftToLocalStorage()
+  },
+  { deep: true },
 )
 
 const storeOptions = computed(() => {
@@ -277,7 +360,8 @@ const handleSubmitReport = async () => {
     } else {
       selectedStoreId.value = null
     }
-    fetchBanks()
+    await fetchBanks()
+    clearDraftFromLocalStorage()
   } catch (error) {
     console.error('Failed to create report:', error)
     const errorMessage = error.response?.data?.message || 'Terjadi kesalahan saat membuat laporan.'
@@ -288,17 +372,9 @@ const handleSubmitReport = async () => {
 }
 
 const resetForm = () => {
-  reportForm.value = {
-    store_id: '',
-    report_date: format(new Date(), 'yyyy-MM-dd'),
-    keterangan: '',
-    uang_nitip: 0,
-    balances: banks.value.map((bank) => ({
-      bank_id: bank.bank_id,
-      bank_name: bank.bank_name,
-      saldo: 0,
-    })),
-  }
+  reportForm.value = createReportForm({
+    balances: createBalancesFromBanks(),
+  })
 }
 
 const formatCurrency = (amount) => {
@@ -430,7 +506,7 @@ const formatCurrency = (amount) => {
               </div>
 
               <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-6 sm:mb-6">
-                <div v-for="(bankBalance, index) in reportForm.balances" :key="bankBalance.bank_id"
+                <div v-for="bankBalance in reportForm.balances" :key="bankBalance.bank_id"
                   class="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 transition-all duration-200 hover:shadow-md sm:p-6">
                   <div class="mb-3 flex items-center sm:mb-4">
                     <div
