@@ -68,10 +68,10 @@ const initials = computed(() =>
 </script>
 
 <template>
-  <main class="min-h-screen max-w-full overflow-x-hidden bg-linear-to-b from-slate-50 to-slate-100 px-3 py-4 sm:px-4 lg:px-6">
+  <main class="min-h-screen max-w-full overflow-x-hidden bg-gradient-to-b from-slate-50 to-slate-100 px-3 py-4 sm:px-4 lg:px-6">
     <section class="mx-auto max-w-6xl">
       <div
-        class="relative mb-5 overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 shadow-lg shadow-blue-900/20 sm:mb-7 sm:p-7"
+        class="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 shadow-lg shadow-blue-900/20 sm:mb-7 sm:p-7"
       >
         <div class="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-white/10 blur-2xl"></div>
         <div class="pointer-events-none absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-indigo-400/20 blur-2xl"></div>
@@ -105,10 +105,10 @@ const initials = computed(() =>
           v-for="link in quickLinks"
           :key="link.name"
           :to="link.to"
-          class="group relative flex min-h-[156px] min-w-0 flex-col justify-between overflow-hidden rounded-2xl bg-linear-to-br p-4 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-100 sm:min-h-[185px] sm:p-5"
+          class="group relative flex min-h-[156px] min-w-0 flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br p-4 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-100 sm:min-h-[185px] sm:p-5"
           :class="[link.gradient, link.glow]"
         >
-          <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 to-transparent"></div>
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
           <div
             class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-xl transition-transform duration-500 group-hover:scale-150"
           ></div>

@@ -118,9 +118,9 @@ onUnmounted(() => {
             class="flex items-center justify-center transition-all duration-300 ease-out"
             :class="
               item.primary
-                ? 'mb-1 h-14 w-14 -translate-y-3 rounded-2xl bg-linear-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-600/40 ring-4 ring-white group-active:scale-95'
+                ? 'mb-1 h-14 w-14 -translate-y-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-600/40 ring-4 ring-white group-active:scale-95'
                 : isBottomNavActive(item)
-                  ? 'h-9 w-12 rounded-2xl bg-linear-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/30'
+                  ? 'h-9 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/30'
                   : 'h-9 w-12 rounded-2xl text-gray-400 group-hover:bg-gray-100 group-active:scale-95'
             "
           >
