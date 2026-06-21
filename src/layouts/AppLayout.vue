@@ -4,9 +4,11 @@ import { useRoute } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useSplashScreen } from '@/composables/useSplashScreen'
 
 const route = useRoute()
 const { isKaryawan } = useAuth()
+const { hideSplash } = useSplashScreen()
 const isSidebarOpen = ref(false)
 const isDesktopViewport = ref(false)
 const showSidebar = computed(() => !isKaryawan.value)
@@ -70,6 +72,7 @@ watch(showSidebar, (nextShowSidebar) => {
 onMounted(() => {
   syncSidebarWithViewport()
   window.addEventListener('resize', syncSidebarWithViewport)
+  hideSplash()
 })
 
 onUnmounted(() => {

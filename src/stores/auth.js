@@ -24,13 +24,6 @@ export const useAuthStore = defineStore('auth', {
         this.user = response.data.user
         localStorage.setItem('token', this.token)
         localStorage.setItem('user', JSON.stringify(this.user))
-        Swal.fire({
-          icon: 'success',
-          title: 'Login Successful!',
-          text: 'Welcome back!',
-          showConfirmButton: false,
-          timer: 1500,
-        })
         return true
       } catch (error) {
         console.error('Login failed:', error)
